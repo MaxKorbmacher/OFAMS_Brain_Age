@@ -14,8 +14,7 @@ Torkildsen, Ø., Wergeland, S., Bakke, S., Beiske, A. G., Bjerve, K. S., Hovdal,
 A Gadolinium tracer was used during MRI (T1-weighted) aquisition. Most of the acquisitions were at relatively low resolution with the exception of fast low angle shot (FLASH) acquisitions at baseline, m6, m24, and m120. In some cases, due to adverse events, patients were scanned ±1 month from the scheduled appointment.
 
 T2-weighted and T1-weighted gadolinium enhanced MRI scans were conducted using standard head coil with a 1·5 Tesla MRI unit. Imaging at the 10-year follow-up visit was performed at
-different study sites, on a 3-Tesla (T) MRI scanner if available, alternatively using a 1.5 T MRI scanner, with a standard head coil. More information on the 
-https://doi.org/10.1007/s00330-021-08405-8
+different study sites, on a 3-Tesla (T) MRI scanner if available, alternatively using a 1.5 T MRI scanner, with a standard head coil. More information on the scanner parameters can be found at https://doi.org/10.1007/s00330-021-08405-8
 
 ## MRI processing
 The data were then reconstructed using FreeSurfer version 7.1.1, and the tabularised data averaging across the parcels of the Desikan-Kelliany atlas used as input data for a trained machine learning brain age model to predict brain age.
