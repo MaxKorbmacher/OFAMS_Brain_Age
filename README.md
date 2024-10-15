@@ -1,4 +1,4 @@
-# OFAMS Brain Age
+# OFAMS longitudinal analysis of brain age
 Analyses on the longitudinal OFAMS (ω-3 Fatty Acid Treatment in Multiple Sclerosis (MS)) MRI data using Brain Age
 
 ## Background
