@@ -10,6 +10,8 @@ Torkildsen, Ø., Wergeland, S., Bakke, S., Beiske, A. G., Bjerve, K. S., Hovdal,
 ## MRI data
 A Gadolinium tracer was used during MRI (T1-weighted) aquisition. Most of the acquisitions were at relatively low resolution with the exception of fast low angle shot (FLASH) acquisitions at baseline, m6, m24, and m120. In some cases, due to adverse events, patients were scanned ±1 month from the scheduled appointment.
 
+T2-weighted and T1-weighted gadolinium enhanced MRI scans were conducted using standard head coil with a 1·5 Tesla MRI unit. Images included sagittal FLAIR (repetition time (TR) 6000-10000 ms, echo time (TE) 100 ms, matrix size 256x256, number of excitations (NEX) 2, field of view (FOV) 250 mm2 , slice thickness 4 mm), axial T1 (TR 500-750 mm, TE 10-20 ms, matrix size 384x512, NEX 2, FOV 250 mm2, slice thickness 4 mm) and T2 weighted fast spin echo (TSE/FSE) (TR 4661 ms, TE 100 ms, matrix size 384x512, NEX 3, FOV 250 mm2, slice thickness 4 mm), in addition to sagittal 3D T1 weighted spoiled gradient echo (FFE/FLASH) (TR 20 ms, TE 4·6 ms, flip angle 25, matrix size 256, NEX 1, FOV 250 mm2, slice thickness 1 mm). All patients were given 15 ml contrast medium containing gadolinium. 
+
 The data were then reconstructed using FreeSurfer version 7.1.1, and the tabularised data averaging across the parcels of the Desikan-Kelliany atlas used as input data for a trained machine learning brain age model to predict brain age.
 
 The model was previously trained on N = 60,000 scans from healthy controls and validated in N = 10,000 scans of healthy controls. The validation sample was age-matched to the current MS sample (using the baseline age).
