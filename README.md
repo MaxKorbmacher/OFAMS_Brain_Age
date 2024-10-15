@@ -1,4 +1,4 @@
-# OFAMS_Brain_Age
+# OFAMS Brain Age
 Analyses on the longitudinal OFAMS Multiple Sclerosis (MS) MRI data using Brain Age
 
 ## Background
