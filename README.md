@@ -23,10 +23,10 @@ different study sites, on a 3-Tesla (T) MRI scanner if available, alternatively 
 ## MRI processing
 The data were then reconstructed using FreeSurfer version 7.1.1, and the tabularised data averaging across the parcels of the Desikan-Kelliany atlas used as input data for a trained machine learning brain age model to predict brain age.
 
-The model was previously trained on N = 60,000 scans from healthy controls from 7 independent datasets: ABCD, AddNeuroMed, HBN, HCP, Rockland, TOP, UKB.
+The model was trained on N = 58,317 scans from healthy controls from 7 independent datasets: ABCD, AddNeuroMed, HBN, HCP, Rockland, TOP, UKB.
 Validation steps:
-- validation in N = XYZ healthy controls (cross-sectionally). (XYZ datasets).
-- validation in N = 748 MS patients (cross-sectionally. (A single dataset from the Oslo University Hospital, Norway).
+- validation in N = 6,608 healthy controls (cross-sectionally). (7 independent datasets).
+- validation in N = 748 MS patients and N = 751 matched healthy controls (cross-sectionally. (A single patient dataset from the Oslo University Hospital, Norway, and participants from six datasets to match the MS patients: AddNeuroMed, HBN, HCP, Rockland, TOP, UKB).
 - validation in N = 27 healthy controls with a total of 1206 scans. (Two datasets ADNI and BBSC).
 
 The cross-sectional healthy control validation sample was age-matched to the current MS sample (using the baseline age).
