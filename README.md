@@ -25,9 +25,9 @@ The data were then reconstructed using FreeSurfer version 7.1.1, and the tabular
 
 The model was previously trained on N = 60,000 scans from healthy controls from 7 independent datasets: ABCD, AddNeuroMed, HBN, HCP, Rockland, TOP, UKB.
 Validation steps:
-- validation in N = XYZ healthy controls (cross-sectionally).
-- validation in N = 748 MS patients (cross-sectionally.
-- validation in N = 27 healthy controls with a total of 1206 scans.
+- validation in N = XYZ healthy controls (cross-sectionally). (XYZ datasets).
+- validation in N = 748 MS patients (cross-sectionally. (A single dataset from the Oslo University Hospital, Norway).
+- validation in N = 27 healthy controls with a total of 1206 scans. (Two datasets ADNI and BBSC).
 
 The cross-sectional healthy control validation sample was age-matched to the current MS sample (using the baseline age).
 
