@@ -27,7 +27,8 @@ The model was trained on N = 58,317 scans from healthy controls from 7 independe
 Validation steps:
 - validation in N = 6,608 healthy controls (cross-sectionally). (7 independent datasets).
 - validation in N = 748 MS patients and N = 751 matched healthy controls (cross-sectionally. (A single patient dataset from the Oslo University Hospital, Norway, and participants from six datasets to match the MS patients: AddNeuroMed, HBN, HCP, Rockland, TOP, UKB).
-- validation in N = 27 healthy controls with a total of 1206 scans. (Two datasets ADNI and BBSC).
+- validation in N = 24 adults in their scenescence transitioning from HC to MCI to AD with a total of 1103 scans. (ADNI: Alzheimer's Disease Neuroimaging Initiative).
+- validation in N = 3 healthy controls with a total of 103 scans. (BBSC: Bergen Breakfast Scanning Club).
 
 The cross-sectional healthy control validation sample was age-matched to the current MS sample (using the baseline age).
 
@@ -36,4 +37,36 @@ The cross-sectional healthy control validation sample was age-matched to the cur
 2. Whether a brain age shall be predicted for a single subject or several, the obtained tables can be merged to a table per metric (e.g., thickness) using stats2table_bash.sh
 3. Now, the resulting tables need to be merged (again!) into a single table. There is a provided merge.py script in the repository that can be used for that purpose. You end up with tables which can be used as input to predict age / to obtain the desired brain age predictions. Simply add "age" as a variable and you will also obtain corrected brain age predictions. The data frame can contain additional variables which will not be used by the model. The output file will contain all input data + the brain age predictions.
 4. Run 'Rscript 05_predict.R /path/to/your/data.csv' and you will obtain the predictions in the working directory. You can add additional arguments to change paths and the output file name.
+
+## Model validation
+
+The validation process included several steps which go beyond common model validation steps to ensure the applicability not only to cross-sectional, but also longitudinal data. Namely, we conducted validations in a) an age-matched sample to the training set including healthy controls (HC) only [cross-sectional validation set 1], b) in subjects with multiple sclerosis (MS) and age- and sex-matched HCs [cross-sectional validation set 2], c) in midlife HC subjects followed over 1.5 years [longitudinal validation set 1], and d) in senescence subjects transitioning from HC to mild cognitive impairment (MCI) to Alzheimer’s Disease (AD) [longitudinal validation set 2].
+
+Validation in healthy controls
+A simple generalized additive model was trained with each input feature’s relationship with age being modelled as a spline with k = 4 possible knots. Uncorrected brain age predictions were strongly correlated with age (r = 0.9681, MAE=4.849 years, RMSE=6.279 years), and test sample age bias corrected predictions showed excellent age associations (r = 0.9999, MAE=1.333 years, RMSE=1.552 years; see Supplement 999 for training and validation performance metrics).
+
+Validation in multiple sclerosis (MS) patients matched controls
+Brain age predictions were more accurate in HC (r=0.702, MAE=7.335 years, RMSE=9.259 years), compared to MS (r=0.461, MAE=12.554 years, RMSE=14.649 years; full overview in Supplement 111). The raw difference between MS and HC BAGs were 0.406 years, d=0.69, 95% CI[0.58,0.79], p=4.278*10-38, indicated by a two-samples t-test. A linear regression, with sex (betafemales=0.157±0.028 years, p=3.713*10-8), age (beta=0.029±0.001 years,p=6.851*10-73), and scanner (showing multiple significant differences at p<.05) as covariates, also indicated a higher BAG in (beta=0.534±0.075 years, p=2.536*10-12). Due to the observed sex-effect, we added the sex-diagnosis interaction to the model, showing a significant effect (betasex-diag=0.155±0.065, p=0.016), which can be interpreted as a larger difference between MS and HC in males (BAGHC= -0.58, 95%PI[-0.74,-0.42], BAGMS=-0.05, 95%PI[-0.11,0.02]) compared to females (BAGHC= -0.42, 95%PI[-0.58,-0.27], BAGMS=0.11, 95%PI[0.06,0.16]), as indicated by marginal effects and respective prediction intervals, holding age and scanner constant (age=38.50 years, scanner=GE750; see also Fig.1a).
+
+Validation in repeated measures of healthy midlife subjects
+N=3 midlife subjects aged 27.75, 30.38, and 40.54 years at baseline were followed over a period of 1.5 years leading to 103 scans. Bias-corrected brain age was near-perfect related with age (betaage=1.06 years) using linear random slopes at the level of the individual (Fig.1b), or within-subject age-correlations (rsub1=0.991, rsub2=0.983, rsub3=0.965). Age-correlations with uncorrected brain age estimates were weaker (rsub1=0.275, rsub2=0.272, rsub3=0.462), yet stronger than in a previous study using another model on the same data set.1
+
+ 
+Fig.888: Brain age trajectories in healthy controls in midlife.
+
+Validation in repeated measures of elderly subjects transitioning to Alzheimer’s Disease
+In N = 38 elderly adults (baseline: mean=81.63, min=75.70, max=87.40 years of age) with 1872 scans, where subjects were followed over an average time of 8.62 years (min=1.2 years, max=15.2), marginal means by the best fitting model (marginal R2=3.36%, conditional R2=97.41%, see Supplement), indicated the lowest BAG in healthy controls (BAGmales=0.42, BAGmales=0.72), in contrast to mild cognitive impairment (BAGmales=0.61, BAGmales=0.90) and Alzheimer’s Disease (BAGmales=0.73, BAGmales=1.03) at the age of 85.45. For ageing trajectories see Fig.1c-d. 
+
+ 
+Fig.999: Brain age trajectories in senescence (ADNI) and transition from HC to MCI to AD. Left panel: Within group correlations between corrected brain age estimates and age (not accounting for subject). Right panel: within-subject correlations between corrected brain age estimates and age (not accounting for diagnosis). Note: data points are not shown for better visualization of the slopes.
+
+
+
+Evaluation
+The ageing trajectories indicate that our brain age models can both represent diverse samples’ healthy ageing and simultaneously discriminate individuals with a disorder by an indicated higher brain age, i.e. higher modelling error. The steeper/quicker increase of brain age in mild cognitive impairment (Fig.999) indicates that our model might also be used to evaluate longitudinal brain ageing trajectories.
+ 
+References
+
+1.	Leonardsen, E. H. et al. Deep neural networks learn general and clinically relevant representations of the ageing brain. NeuroImage 256, 119210 (2022).
+
 
