@@ -1,6 +1,6 @@
 # train lifespan models from simple FS output
 # then predict in several validation samples
-# Max Korbmacher, 18 Oct 2024
+# Max Korbmacher, 23 Oct 2024
 #
 # prep (load data and pkgs) ####
 setwd("/cluster/projects/p33/users/maxk/MS/")
