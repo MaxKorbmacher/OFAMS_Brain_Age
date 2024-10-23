@@ -35,4 +35,5 @@ The cross-sectional healthy control validation sample was age-matched to the cur
 1. After the FreeSurfer recon-all call or similar, e.g. using FastSurfer, one can extract tabular information per subject.
 2. Whether a single subject or several, these tables can be merged to a table per metric (e.g., thickness) using stats2table_bash.sh
 3. Now, the resulting tables need to be merged (again!) into a single table. There is a provided merge.py script in the repository that can be used for that purpose. You end up with tables which can be used as input to predict age / to obtain the desired brain age predictions. Simply add "age" as a variable and you will also obtain corrected brain age predictions.
-4. Run the 
+4. Run 'Rscript 05_predict.R /path/to/your/data.csv' and you will obtain predictions.
+
