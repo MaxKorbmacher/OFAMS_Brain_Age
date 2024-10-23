@@ -27,7 +27,7 @@ The model was trained on N = 58,317 scans from healthy controls from 7 independe
 Validation steps:
 - validation in N = 6,608 healthy controls (cross-sectionally). (7 independent datasets).
 - validation in N = 748 MS patients and N = 751 matched healthy controls (cross-sectionally. (A single patient dataset from the Oslo University Hospital, Norway, and participants from six datasets to match the MS patients: AddNeuroMed, HBN, HCP, Rockland, TOP, UKB).
-- validation in N = 24 adults in their scenescence transitioning from HC to MCI to AD with a total of 1103 scans. (ADNI: Alzheimer's Disease Neuroimaging Initiative).
+- validation in N = 24 adults in their senescence transitioning from HC to MCI to AD with a total of 1103 scans. (ADNI: Alzheimer's Disease Neuroimaging Initiative).
 - validation in N = 3 healthy controls with a total of 103 scans. (BBSC: Bergen Breakfast Scanning Club).
 
 The cross-sectional healthy control validation sample was age-matched to the current MS sample (using the baseline age).
