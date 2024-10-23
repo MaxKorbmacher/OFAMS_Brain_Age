@@ -33,12 +33,9 @@ pacman::p_load(mgcv, Metrics, MASS, relaimpo, lmtest, lme4, effectsize,
 noquote("Load data and model.")
 df=read.csv(args[1])
 m=readRDS(paste0(args[3],"/model.rda"))
-params=read.csv(paste0(args[3],"corr_params.csv"))
-noquote("Predict")
+params=read.csv(paste0(args[3],"/corr_params.csv"))
+noquote("Predict.")
 df$brainage=predict(object=m,df)
 df$corrected_brainage= df$brainage + (df$age - (params$slope*df$brainage+params$intercept))
-
-predicted_age_test + (age_test - (slope*predicted_age_test+intercept))
-
-
-write.csv(x = brainage_df, file = args[2], col.names = F)
+noquote("Write data file.")
+write.csv(x = df, file = args[2], row.names = F)
