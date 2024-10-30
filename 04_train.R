@@ -1,6 +1,6 @@
 # train lifespan models from simple FS output
 # then predict in several validation samples
-# Max Korbmacher, 23 Oct 2024
+# Max Korbmacher, 18 Oct 2024
 #
 # prep (load data and pkgs) ####
 setwd("/cluster/projects/p33/users/maxk/MS/")
@@ -30,6 +30,7 @@ library(marginaleffects)
 library(MuMIn)
 library(rlist)
 library(lmerTest)
+library(sjPlot)
 #
 # train ####
 nms=train %>% dplyr::select(starts_with("lh_"), starts_with("rh_"))%>%names
@@ -194,15 +195,18 @@ ggsave("results/ADNI_plot.pdf",ADNI_plot, width = 12, height = 7)
 # 
 # We show the Results in a table
 ADNI$BAG=ADNI$brainage_corrected-ADNI$age
+m0 = lmer(BAG~age+sex+diagnosis+(0+age|subs),data=ADNI)
 m1 = lmer(BAG~age+sex+diagnosis+(1|diagnosis/subs),data=ADNI)
 m2 = lmer(BAG~age+sex+diagnosis+(1|diagnosis),data=ADNI)
 m3 = lmer(BAG~age+sex+diagnosis+(1|subs),data=ADNI)
-r.squaredGLMM(m1) # the best model based on variances explained
+r.squaredGLMM(m0) # the best model based on variances explained
+r.squaredGLMM(m1)
 r.squaredGLMM(m2)
 r.squaredGLMM(m3)
-anova(m1,m2,m3) # m3 is however best/equal to k1 in terms of chisq test, aic, bic)
+anova(m0,m1,m2,m3) # m3 is however best/equal to m1 in terms of chisq test, aic, bic)
+ggpredict(m0, terms=c("diagnosis","sex"), type = "re", interval = "prediction")
 ggpredict(m1, terms=c("diagnosis","sex"), type = "re", interval = "prediction")
-#ggpredict(m2, terms=c("diagnosis"), type = "re", interval = "prediction")
+ggpredict(m2, terms=c("diagnosis","sex"), type = "re", interval = "prediction")
 ggpredict(m3, terms=c("diagnosis","sex"), type = "re", interval = "prediction")
 
 # we report both best performing models
@@ -354,3 +358,66 @@ print("The models are similar after training sample age bias correction.")
 print("Still, the GAM-based corrected brain age gaps differentiate AD from MCI (and HC) better than the linear models.")
 #
 #
+# BAG longitudinal checks ####
+# for comparability with the target data, we are interested in expectable trajectories
+# here, we have BBSC and ADNI data available
+sjPlot::plot_model(m3, type="pred", terms=c("age","diagnosis","sex"), pred.type="fe", ci.lvl=.95)
+p1=ggplot(data= ADNI%>%filter(diagnosis=="HC"), aes(x = age, y = BAG)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  stat_smooth(method = "lm",aes(group = 1),color="blue",fill = "blue")+ #
+  ylab("BAG HC") + xlab("Age") +
+  #stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+p2=ggplot(data= ADNI%>%filter(diagnosis=="MCI"), aes(x = age, y = BAG)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  stat_smooth(method = "lm",aes(group = 1),color="blue",fill = "blue")+ #
+  ylab("BAG MCI") + xlab("Age") +
+  #stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+p3=ggplot(data= ADNI%>%filter(diagnosis=="AD"), aes(x = age, y = BAG)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  stat_smooth(method = "lm",aes(group = 1),color="blue",fill = "blue")+ #
+  ylab("BAG AD") + xlab("Age") +
+  #stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+ADNI_plot2=ggarrange(p1,p2,p3)
+ggsave("results/ADNI_plot2.pdf",ADNI_plot2, width = 6, height = 6)
+ggsave("/tsd/p33/home/p33-maxk/ADNI_plot2.pdf",ADNI_plot2, width = 6, height = 6)
+
+long_validation$BAG=long_validation$brainage_corrected-long_validation$age
+
+p1=ggplot(data= long_validation%>%filter(data=="BBSC")%>%filter(subs=="sub-1"), aes(x = age, y = BAG)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = subs), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  stat_smooth(method = "lm",aes(group = 1),color="blue",fill = "blue")+ #
+  ylab("BAG BBSC1") + xlab("Age") +
+  #stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+p2=ggplot(data= long_validation%>%filter(data=="BBSC")%>%filter(subs=="sub-2"), aes(x = age, y = BAG)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = subs), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  stat_smooth(method = "lm",aes(group = 1),color="blue",fill = "blue")+ #
+  ylab("BAG BBSC2") + xlab("Age") +
+  #stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+p3=ggplot(data= long_validation%>%filter(data=="BBSC")%>%filter(subs=="sub-3"), aes(x = age, y = BAG)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = subs), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  stat_smooth(method = "lm",aes(group = 1),color="blue",fill = "blue")+ #
+  ylab("BAG BBSC3") + xlab("Age") +
+  #stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+BBSC_p2=ggarrange(p1,p2,p3)
+ggsave("results/BBSC_p2.pdf",BBSC_p2, width = 6, height = 6)
+ggsave("/tsd/p33/home/p33-maxk/BBSC_p2.pdf",BBSC_p2, width = 6, height = 6)
+hist(train$age,breaks = 100)
+nrow(train)
