@@ -42,18 +42,76 @@ Validation steps:
  c) validation in N = 3 healthy controls with a total of 103 scans. (BBSC: Bergen Breakfast Scanning Club).
  d) validation in N = 24 adults in their senescence transitioning from HC to MCI to AD with a total of 1103 scans. (ADNI: Alzheimer's Disease Neuroimaging Initiative).
 
-**a) Validation in healthy controls**
+## Validation
+Fit in training data (N=150,517) and validation data (N = 6,608, mean age = 49.49±25.04, range: 5.28-86.7) for corrected brain age (c) and uncorrected brain age (u). Corrected brain age, is the individual level brain age where the training sample bias was regressed out (see: https://doi.org/10.1002/hbm.25837).
 
-A simple generalized additive model was trained with each input feature’s relationship with age being modelled as a spline with k = 4 possible knots. Uncorrected brain age predictions were strongly correlated with age (r = 0.9681, MAE=4.849 years, RMSE=6.279 years), and test sample age bias corrected predictions showed excellent age associations (r = 0.9999, MAE=1.333 years, RMSE=1.552 years; see Supplement 999 for training and validation performance metrics).
+All training and validation data were obtained from healthy controls! Fit metrics are comparable to other models trained on similar data and corrected brain age estimates produce naturally better fit indices. However, the advantage of the presented models is their generalizability to other, external, datasets (see below) and their explainablity, since the models have a simple architecture of added splines which allowing polynomials up to the 4th order / k=4 knots.
 
-**b) Validation in multiple sclerosis (MS) patients matched controls**
+We also want to highlight that hemisphere-specific models perform similar to models of both hemispheres (also highlighted previously: https://doi.org/10.1038/s41467-024-45282-3).
 
-Brain age predictions were more accurate in HC (r=0.702, MAE=7.335 years, RMSE=9.259 years), compared to MS (r=0.461, MAE=12.554 years, RMSE=14.649 years). The raw difference between MS and HC BAGs were 0.406 years, d=0.69, 95% CI[0.58,0.79], p=4.278*10-38, indicated by a two-samples t-test. A linear regression, with sex (betafemales=0.157±0.028 years, p=3.713*10-8), age (beta=0.029±0.001 years,p=6.851*10-73), and scanner (showing multiple significant differences at p<.05) as covariates, also indicated a higher BAG in (beta=0.534±0.075 years, p=2.536*10-12). Due to the observed sex-effect, we added the sex-diagnosis interaction to the model, showing a significant effect (betasex-diag=0.155±0.065, p=0.016), which can be interpreted as a larger difference between MS and HC in males (BAGHC= -0.58, 95%PI[-0.74,-0.42], BAGMS=-0.05, 95%PI[-0.11,0.02]) compared to females (BAGHC= -0.42, 95%PI[-0.58,-0.27], BAGMS=0.11, 95%PI[0.06,0.16]), as indicated by marginal effects and respective prediction intervals, holding age and scanner constant (age=38.50 years, scanner=GE750; see also Fig.1a).
+|    Sample and BA    | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
+| :---------: |   :---------: |  :---: |  :---: |  :---: |
+|Training u   |   0.956750671687792|0.915371847775041|5.09349719782765|6.50127671123974|
+|Training c   |   0.963398170008129|0.928136033975012|4.89328500185453|6.21857468360546|
+|Test u |   0.962232357394819|0.925891109617591|5.28268535093494|6.82924637097514|
+|Test c |   0.967967842137675|0.936961743412667|5.20338122552432|6.65083281740381|
 
-**c) Validation in repeated measures of healthy midlife subjects**
+(R2 = Variance explained, MAE = Mean Absolute Error, RMSE = Root Mean Squared Error)
 
-N=3 midlife subjects aged 27.75, 30.38, and 40.54 years at baseline were followed over a period of 1.5 years leading to 103 scans. Bias-corrected brain age was near-perfect related with age (betaage=1.06 years) using linear random slopes at the level of the individual (Fig.1b), or within-subject age-correlations (rsub1=0.991, rsub2=0.983, rsub3=0.965). Age-correlations with uncorrected brain age estimates were weaker (rsub1=0.275, rsub2=0.272, rsub3=0.462), yet stronger than in a previous study using another model on the same data set. [1]
- 
+Fit in external validation data, which are all healthy controls (N = 751, mean age=38.83±9.77, range: 18.63-87.5):
+
+| Hemisphere and Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
+|  :----------------------: | :---------: |  :---: |  :---: |  :---: |
+|    both u    | 0.756129919604673|0.571732455321369|5.98370121165647|7.53618066884458|
+|    both c    | 0.784920399082748|0.616100032896221|5.96605257239848|7.45480676141757|
+
+An example of data fit for a single disease group, here multiple sclerosis patients (N = 748, mean age=38.63±9.46, range: 18.46-70.34):
+
+| Hemisphere and Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
+|  :----------------------: | :---------: |  :---: |  :---: |  :---: |
+|    both u    | 0.462637902532409|0.214033828859586|10.4082787109805|12.4969539450843|
+|    both c    | 0.535708898309448|0.286984023727923|9.58081588153022|11.5616606943567|
+|    left u    | 0.429158637468531|0.184177136113846|10.2888006631915|12.5255791764549|
+|    left c    | 0.516285702288648|0.266550926387682|9.32516867981733|11.4368185316271|
+|    right u   | 0.429136769391267|0.184158366843574|11.4226751222381|13.7605043198014|
+|    right c   | 0.515346555058868|0.265582071811042|10.381603146451|12.5945757584713|
+
+Finally, we were interested in how our model performs in longitudinal data looking at three healthy individuals scanned in total 103 times over a 1.5 years period (mean age per subject: 30.66, 28.09, 40.66).
+|Subject|	Both Pearson's r|	p	|Right Pearson's r|	p	|Left Pearson's r|	p|
+| :---: |:---: |:---: |:---: |:---: |:---: |:---: |
+|sub-1 u	|0.22320709	|0.177966078|	0.132639698|	0.427283165|	0.153016081|	0.3590577|
+|sub-2 u	|0.208588882|	0.196474389|	0.270273605|	0.091659096	|0.13528954	|0.405211205|
+|sub-3 u	|0.523604727|	0.007226934	|0.344758447|	0.091462119	|0.409403763	|0.042124956|
+|sub-1 c	|0.246593076|	0.135573488	|0.159460294|	0.338930544	|0.177910042	|0.28523668|
+|sub-2 c	|0.229019752|	0.155174112	|0.290541558|	0.068951919	|0.158322876	|0.329192221|
+|sub-3 c	|0.530987825|	0.006313065	|0.353684003|	0.082838285|	0.417134587	|0.038028953|
+
+Longitudinal results suggest slightly better individual-level model fit than previous models (e.g., https://doi.org/10.1002/brb3.3219).
+
+Interrim conclusion from the model validation: We recommend using corrected brain age estimates, especially in the case of longitudinal analyses.
+
+Another reasoning for using corrected estimates is boosting effect sizes for group differences. Let's take the mentioned MS sample as an example again:
+As an example how corrected brain age estimates boost predictions:
+Corrected BAG differences between MS (mean age = 38.63±9.46 years) and HC (mean age = 38.73±9.61) are more clearly expressed when correcting for the training age bias:
+See for that first the corrected BAG differences between MS and HC (paired samples t-tests):
+
+| BAG | Cohen's d & 95% CI | t(df) | p|
+|:---:|:---:|:---:|:---:|
+|Both BAG c| d=-1.00[-1.11;-0.89] | t(1462)=-19.40| p<2.2*10^-16|
+|L BAG c| d=-0.90[-1.17;-0.79]| t(1459.3)=-17.44| p<2.2*10^-16|
+|R BAG c| d=-0.90[-1.16;-0.79]| t(1468.5)=-17.43| p<2.2*10^-16|
+|Both BAG u| d=-0.89[-1.15;-0.79]| t(1466-7)=-17.29| p<2.2*10^-16|
+|L BAG u| d=-0.77[-0.88;-0.67]| t(1465.5)=-15.00|  p<2.2*10^-16|
+|R BAG u| d=-0.77[-0.87;-0.66]| t(1475.1)=-14.87|  p<2.2*10^-16|
+
+We see clear differences between the outlined group differences.
+
+
+
+
+
+
+
 **d) Validation in repeated measures of elderly subjects transitioning to Alzheimer’s Disease**
 
 In N = 38 elderly adults (baseline: mean=81.63, min=75.70, max=87.40 years of age) with 1872 scans, where subjects were followed over an average time of 8.62 years (min=1.2 years, max=15.2), marginal means by the best fitting model (marginal R2=3.36%, conditional R2=97.41%, see Supplement), indicated the lowest BAG in healthy controls (BAGmales=0.42, BAGmales=0.72), in contrast to mild cognitive impairment (BAGmales=0.61, BAGmales=0.90) and Alzheimer’s Disease (BAGmales=0.73, BAGmales=1.03) at the age of 85.45. For ageing trajectories see Fig.1c-d. 
