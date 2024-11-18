@@ -60,17 +60,17 @@ We also want to highlight that hemisphere-specific models perform similar to mod
 
 Fit in external validation data, which are all healthy controls (N = 751, mean age=38.83±9.77, range: 18.63-87.5):
 
-| Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
+| Sample & Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
 |  :----------------------: | :---------: |  :---: |  :---: |  :---: |
-|    u    | 0.756129919604673|0.571732455321369|5.98370121165647|7.53618066884458|
-|    c    | 0.784920399082748|0.616100032896221|5.96605257239848|7.45480676141757|
+|   Validation u    | 0.756129919604673|0.571732455321369|5.98370121165647|7.53618066884458|
+|    Validation c    | 0.784920399082748|0.616100032896221|5.96605257239848|7.45480676141757|
 
 An example of data fit for a single disease group, here multiple sclerosis patients (N = 748, mean age=38.63±9.46, range: 18.46-70.34):
 
-| Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
+| Sample $ Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
 |  :----------------------: | :---------: |  :---: |  :---: |  :---: |
-|    u    | 0.462637902532409|0.214033828859586|10.4082787109805|12.4969539450843|
-|    c    | 0.535708898309448|0.286984023727923|9.58081588153022|11.5616606943567|
+|    MS u    | 0.462637902532409|0.214033828859586|10.4082787109805|12.4969539450843|
+|    MS c    | 0.535708898309448|0.286984023727923|9.58081588153022|11.5616606943567|
 
 Finally, we were interested in how our model performs in longitudinal data looking at three healthy individuals scanned in total 103 times over a 1.5 years period (mean age per subject: 30.66, 28.09, 40.66).
 |Subject|	Uncorrected BA Pearson's r|	p	| Corrected BA Pearson's r|	p	|
