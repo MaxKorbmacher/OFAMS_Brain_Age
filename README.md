@@ -80,7 +80,7 @@ Finally, we were interested in how our model performs in longitudinal data looki
 |sub-3 u	|0.523604727|	0.007226934	|0.530987825|	0.006313065	|
 
 
-Longitudinal results suggest slightly better individual-level model fit than previous models (e.g., https://doi.org/10.1002/brb3.3219).
+Longitudinal results suggest better individual-level model fit than previous models (e.g., https://doi.org/10.1002/brb3.3219).
 
 Interrim conclusion from the model validation: We recommend using corrected brain age estimates, especially in the case of longitudinal analyses.
 
@@ -98,22 +98,18 @@ See for that first the corrected BAG differences between MS and HC (paired sampl
 |L BAG u| d=-0.77[-0.88;-0.67]| t(1465.5)=-15.00|  p<2.2*10^-16|
 |R BAG u| d=-0.77[-0.87;-0.66]| t(1475.1)=-14.87|  p<2.2*10^-16|
 
-We see clear differences between the outlined group differences.
-
-
-
-
+We see clear differences between the outlined group differences, where corrected brain ages produce larger effect sizes differentiating healthy controls and MS patients.
 
 
 
 **d) Validation in repeated measures of elderly subjects transitioning to Alzheimer’s Disease**
 
-In N = 38 elderly adults (baseline: mean=81.63, min=75.70, max=87.40 years of age) with 1872 scans, where subjects were followed over an average time of 8.62 years (min=1.2 years, max=15.2), marginal means by the best fitting model (marginal R2=3.36%, conditional R2=97.41%, see Supplement), indicated the lowest BAG in healthy controls (BAGmales=0.42, BAGmales=0.72), in contrast to mild cognitive impairment (BAGmales=0.61, BAGmales=0.90) and Alzheimer’s Disease (BAGmales=0.73, BAGmales=1.03) at the age of 85.45. For ageing trajectories see Fig.1c-d. 
+In N = 38 elderly adults (baseline: mean=81.63, min=75.70, max=87.40 years of age) with 1872 scans, where subjects were followed over an average time of 8.62 years (min=1.2 years, max=15.2), 
 
-**Evaluation of the model**
 
-The ageing trajectories indicate that our brain age models can both represent diverse samples’ healthy ageing and simultaneously discriminate individuals with a disorder by an indicated higher brain age, i.e. higher modelling error. The steeper/quicker increase of brain age in mild cognitive impairment (Fig.999) indicates that our model might also be used to evaluate longitudinal brain ageing trajectories.
- 
+marginal means by the best fitting model (marginal R2=3.36%, conditional R2=97.41%, see Supplement), indicated the lowest BAG in healthy controls (BAGmales=0.42, BAGmales=0.72), in contrast to mild cognitive impairment (BAGmales=0.61, BAGmales=0.90) and Alzheimer’s Disease (BAGmales=0.73, BAGmales=1.03) at the age of 85.45. For ageing trajectories see Fig.1c-d. 
+
+
 **References**
 
 [1]	Leonardsen, E. H. et al. Deep neural networks learn general and clinically relevant representations of the ageing brain. NeuroImage 256, 119210 (2022).
