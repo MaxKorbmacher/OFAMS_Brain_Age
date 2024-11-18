@@ -104,11 +104,8 @@ We see clear differences between the outlined group differences, where corrected
 
 **d) Validation in repeated measures of elderly subjects transitioning to Alzheimer’s Disease**
 
-In N = 38 elderly adults (baseline: mean=81.63, min=75.70, max=87.40 years of age) with 1872 scans, where subjects were followed over an average time of 8.62 years (min=1.2 years, max=15.2), 
-
-
-marginal means by the best fitting model (marginal R2=3.36%, conditional R2=97.41%, see Supplement), indicated the lowest BAG in healthy controls (BAGmales=0.42, BAGmales=0.72), in contrast to mild cognitive impairment (BAGmales=0.61, BAGmales=0.90) and Alzheimer’s Disease (BAGmales=0.73, BAGmales=1.03) at the age of 85.45. For ageing trajectories see Fig.1c-d. 
-
+In N = 38 elderly adults (baseline: mean=81.63, min=75.70, max=87.40 years of age) with 1872 scans, where subjects were followed over an average time of 8.62 years (min=1.2 years, max=15.2).
+**Results need to be added.**
 
 **References**
 
