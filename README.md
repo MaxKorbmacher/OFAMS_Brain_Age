@@ -34,15 +34,14 @@ different study sites, on a 3-Tesla (T) MRI scanner if available, alternatively 
 ## MRI processing
 The data were then reconstructed using FreeSurfer version 7.1.1, and the tabularised data averaging across the parcels of the Desikan-Kelliany atlas used as input data for a trained machine learning brain age model to predict brain age.
 
-## Model training and validation
+## Model training and validation steps: overview
 The model was trained on N = 58,317 scans from healthy controls from 7 independent datasets: ABCD, AddNeuroMed, HBN, HCP, Rockland, TOP, UKB.
 Validation steps:
  a) validation in N = 6,608 healthy controls (cross-sectionally). (7 independent datasets).
  b) validation in N = 748 MS patients and N = 751 matched healthy controls (cross-sectionally. (A single patient dataset from the Oslo University Hospital, Norway, and participants from six datasets to match the MS patients: AddNeuroMed, HBN, HCP, Rockland, TOP, UKB).
  c) validation in N = 3 healthy controls with a total of 103 scans. (BBSC: Bergen Breakfast Scanning Club).
- d) validation in N = 24 adults in their senescence transitioning from HC to MCI to AD with a total of 1103 scans. (ADNI: Alzheimer's Disease Neuroimaging Initiative).
 
-## Validation
+## Training
 Fit in training data (N=150,517) and validation data (N = 6,608, mean age = 49.49±25.04, range: 5.28-86.7) for corrected brain age (c) and uncorrected brain age (u). Corrected brain age, is the individual level brain age where the training sample bias was regressed out (see: https://doi.org/10.1002/hbm.25837).
 
 All training and validation data were obtained from healthy controls! Fit metrics are comparable to other models trained on similar data and corrected brain age estimates produce naturally better fit indices. However, the advantage of the presented models is their generalizability to other, external, datasets (see below) and their explainablity, since the models have a simple architecture of added splines which allowing polynomials up to the 4th order / k=4 knots.
@@ -58,6 +57,7 @@ We also want to highlight that hemisphere-specific models perform similar to mod
 
 (R2 = Variance explained, MAE = Mean Absolute Error, RMSE = Root Mean Squared Error)
 
+## Validation
 Fit in external validation data, which are all healthy controls (N = 751, mean age=38.83±9.77, range: 18.63-87.5):
 
 | Sample & Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
@@ -100,14 +100,20 @@ See for that first the corrected BAG differences between MS and HC (paired sampl
 
 We see clear differences between the outlined group differences, where corrected brain ages produce larger effect sizes differentiating healthy controls and MS patients.
 
+## Explainability
+An important advantage of the utilzed GAM is that the model coefficients can be fairly easily interpreted using ANOVA test, the respective degrees of freedom and by knocking out regions by setting all feature values of a specific region to 0. See a summary of the findings below. The data used for the visualisation are the training data. However, lesion-styled interpretability is also possible in any unseen data by simpy setting the values of a single region to zero.
+
+A few aspects soon to be added:
+Degrees of freedom per region
+Feature weight maps
+Knockout importance
+Individual level variability
 
 
-**d) Validation in repeated measures of elderly subjects transitioning to Alzheimer’s Disease**
+## Results
+Need to be added.
 
-In N = 38 elderly adults (baseline: mean=81.63, min=75.70, max=87.40 years of age) with 1872 scans, where subjects were followed over an average time of 8.62 years (min=1.2 years, max=15.2).
-**Results need to be added.**
-
-**References**
+## References
 
 [1]	Leonardsen, E. H. et al. Deep neural networks learn general and clinically relevant representations of the ageing brain. NeuroImage 256, 119210 (2022).
 
