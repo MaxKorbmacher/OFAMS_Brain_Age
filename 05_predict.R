@@ -32,10 +32,15 @@ pacman::p_load(mgcv, Metrics, MASS, relaimpo, lmtest, lme4, effectsize,
                lmerTest,update = F)
 noquote("Load data and model.")
 df=read.csv(args[1])
-m=readRDS(paste0(args[3],"/model.rda"))
+m=readRDS(paste0(args[3],"/sim_model.rda"))
 params=read.csv(paste0(args[3],"/corr_params.csv"))
 noquote("Predict.")
-df$brainage=predict(object=m,df)
-df$corrected_brainage= df$brainage + (df$age - (params$slope*df$brainage+params$intercept))
+df$brainage=predict(object=m,df) # predict brain age
+if (length(df$age)>0) {
+  df$corrected_brainage= df$brainage + (df$age - (params$slope*df$brainage+params$intercept)) # correct brain age, if true age is present
+} else if (length(df$age)==0) {
+  print("No age variable added in the dataset.")
+  print("Corrected brain age estimates are hence not provided.")
+}
 noquote("Write data file.")
 write.csv(x = df, file = args[2], row.names = F)
