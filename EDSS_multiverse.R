@@ -7,6 +7,7 @@ data = read.csv("/Users/max/Documents/Local/MS/results/interrim_data.csv")
 predictors = c("geno","relapses_12mnths_before_baseline",
                "CH3L.1..mg.ml..mean","NfL..pg.ml.",
                "BL_PASATcorrect" ,"smoking_OFAMS","Mean_BMI_OFAMS","Treatment_OFAMS",
+               "Omega3_suppl",
                "BAG_c","baselineC" ,"baselineV",
                "PF","RF","BP","GH","VT","SF","RE","MH")
 print("Establishing all possible combinations of independently added variables to a list of formulas later used in LMs.")
