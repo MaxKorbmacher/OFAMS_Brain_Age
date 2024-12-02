@@ -92,12 +92,8 @@ See for that first the corrected BAG differences between MS and HC (paired sampl
 
 | BAG | Cohen's d & 95% CI | t(df) | p|
 |:---:|:---:|:---:|:---:|
-|Both BAG c| d=-1.00[-1.11;-0.89] | t(1462)=-19.40| p<2.2*10^-16|
-|L BAG c| d=-0.90[-1.17;-0.79]| t(1459.3)=-17.44| p<2.2*10^-16|
-|R BAG c| d=-0.90[-1.16;-0.79]| t(1468.5)=-17.43| p<2.2*10^-16|
-|Both BAG u| d=-0.89[-1.15;-0.79]| t(1466-7)=-17.29| p<2.2*10^-16|
-|L BAG u| d=-0.77[-0.88;-0.67]| t(1465.5)=-15.00|  p<2.2*10^-16|
-|R BAG u| d=-0.77[-0.87;-0.66]| t(1475.1)=-14.87|  p<2.2*10^-16|
+|BAG c| d=-1.00[-1.11;-0.89] | t(1462)=-19.40| p<2.2*10^-16|
+|BAG u| d=-0.89[-1.15;-0.79]| t(1466-7)=-17.29| p<2.2*10^-16|
 
 We see clear differences between the outlined group differences, where corrected brain ages produce larger effect sizes differentiating healthy controls and MS patients.
 
