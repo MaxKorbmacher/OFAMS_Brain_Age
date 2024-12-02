@@ -3,6 +3,7 @@
 # Max Korbmacher, 30, Nov 2024
 #
 #
+savepath = "/Users/max/Documents/Local/MS/results/"
 # Packages and data ####
 #
 # pkgs
@@ -70,7 +71,7 @@ edit_plots_in_place <- function(names, env, scale) {
 }
 # Make a plotting functions
 ## for feature weight based importance
-impp=function(data,Hemisphere){
+impp=function(data){
   data$hemi=ifelse(grepl("lh_",data$Parameter)==T,"left","right")
   data = data[order(data$Parameter),]
   vols=data[grepl("_volume",data$Parameter),]
@@ -83,23 +84,23 @@ impp=function(data,Hemisphere){
   plot1=ggplot(vols) + geom_brain(atlas = dk,aes(fill = F),color="black")+
     #scale_fill_viridis_c(option = "cividis", direction = -1)+
     scale_fill_gradient2(low = "blue",mid = "white",high="red") +
-    labs(title=paste("Feature Importance of Volumes", sep="")) + labs(fill='F') +
+    labs(title=paste("Cortical Volume", sep="")) + labs(fill='F') +
     theme_void()
   plot2=ggplot(thick) + geom_brain(atlas = dk,aes(fill = F),color="black")+
     #scale_fill_viridis_c(option = "cividis", direction = -1)+
     scale_fill_gradient2(low = "blue",mid = "white",high="red") +
-    labs(title=paste("Feature Importance of Cortical Thickness", sep="")) + labs(fill='F') +
+    labs(title=paste("Cortical Thickness", sep="")) + labs(fill='F') +
     theme_void()
   plot3=ggplot(surf) + geom_brain(atlas = dk,aes(fill = F),color="black")+
     #scale_fill_viridis_c(option = "cividis", direction = -1)+
     scale_fill_gradient2(low = "blue",mid = "white",high="red") +
-    labs(title=paste("Feature Importance of Surface Area", sep="")) + labs(fill='F') +
+    labs(title=paste("Surface Area", sep="")) + labs(fill='F') +
     theme_void()
   plot=ggarrange(plot1,plot2,plot3,ncol=1,common.legend = T,legend = "bottom")
-  plot = annotate_figure(plot, top = text_grob(paste("Model: ", Hemisphere, sep=""), color = "black", face = "bold", size = 14)) # give figs a title
+  #plot = annotate_figure(plot, top = text_grob(paste("Model: ", Hemisphere, sep=""), color = "black", face = "bold", size = 14)) # give figs a title
   return(plot)
 }
-dfp=function(data,Hemisphere){
+dfp=function(data){
   data$hemi=ifelse(grepl("lh_",data$Parameter)==T,"left","right")
   data = data[order(data$Parameter),]
   vols=data[grepl("_volume",data$Parameter),]
@@ -112,20 +113,20 @@ dfp=function(data,Hemisphere){
   plot1=ggplot(vols) + geom_brain(atlas = dk,aes(fill = df_std),color="black")+
     scale_fill_viridis_c(option = "cividis", direction = -1)+
     #scale_fill_gradient2(low = "blue",mid = "white",high="red") +
-    labs(title=paste("Feature Importance of Volumes", sep="")) + labs(fill='df') +
+    labs(title=paste("Cortical Volume", sep="")) + labs(fill='df') +
     theme_void()
   plot2=ggplot(thick) + geom_brain(atlas = dk,aes(fill = df_std),color="black")+
     scale_fill_viridis_c(option = "cividis", direction = -1)+
     #scale_fill_gradient2(low = "blue",mid = "white",high="red") +
-    labs(title=paste("Feature Importance of Cortical Thickness", sep="")) + labs(fill='df') +
+    labs(title=paste("Cortical Thickness", sep="")) + labs(fill='df') +
     theme_void()
   plot3=ggplot(surf) + geom_brain(atlas = dk,aes(fill = df_std),color="black")+
     scale_fill_viridis_c(option = "cividis", direction = -1)+
     #scale_fill_gradient2(low = "blue",mid = "white",high="red") +
-    labs(title=paste("Feature Importance of Surface Area", sep="")) + labs(fill='df') +
+    labs(title=paste("Surface Area", sep="")) + labs(fill='df') +
     theme_void()
   plot=ggarrange(plot1,plot2,plot3,ncol=1,common.legend = T,legend = "bottom")
-  plot = annotate_figure(plot, top = text_grob(paste("Model: ", Hemisphere, sep=""), color = "black", face = "bold", size = 14)) # give figs a title
+  #plot = annotate_figure(plot, top = text_grob(paste("Model: ", Hemisphere, sep=""), color = "black", face = "bold", size = 14)) # give figs a title
   return(plot)
 }
 #
@@ -182,36 +183,26 @@ anatp2n=function(data){
 }
 # Plot #####
 # feature importance plotting ####
-fdf[[2]]$Parameter=gsub("rh_","lh_",fdf[[2]]$Parameter)#correct left hemi labels (if wrongly labeled as right)
-hem=c("Both", "Left", "Right")
-fp2=fp=list()
-for(i in 1:length(fdf)){
-  fp[[i]]=impp(fdf[[i]],hem[i])
-  fp2[[i]]=dfp(fdf[[i]],hem[i])
-}
-#set_scale_union(fp[[1]],fp[[2]],fp[[3]],scale=scale_fill_gradient2(low = "blue",mid = "white",high="red"))
-p0=ggarrange(plotlist = fp, ncol=3, common.legend = T, legend = "bottom")
-p00=ggarrange(plotlist = fp2, ncol=3, common.legend = T, legend = "bottom")
+fp=impp(fdf[[1]])
+fp2=dfp(fdf[[1]])
+fp = annotate_figure(fp, top = text_grob(paste("Feature importance", sep=""), color = "black", face = "bold", size = 14)) # give figs a title
+fp2 = annotate_figure(fp2, top = text_grob(paste("Degrees of freedom", sep=""), color = "black", face = "bold", size = 14)) # give figs a title
+imp_df = ggarrange(fp,fp2)
 #
-ggsave("results/feature_importance.pdf",p0,width=15,height = 5) # save feature importance plots
-ggsave("results/feature_importance.jpg",p0,width=15,height = 5)
-ggsave("results/splineshape.pdf",p00,width=15,height = 5) # save plots indicating spline shape
-ggsave("results/splineshape.jpg",p00,width=15,height = 5)
-c(mean(fdf[[1]]$df_std),mean(fdf[[2]]$df_std),mean(fdf[[3]]$df_std)) # check the mean degrees of freedom
+ggsave(paste(savepath,"imp_df.pdf",sep=""),imp_df,width=10,height = 5) # save feature importance and df plot
+ggsave(paste(savepath,"imp_df.jpg",sep=""),imp_df,width=10,height = 5) # save feature importance and df plot
+#
+#c(mean(fdf[[1]]$df_std),mean(fdf[[2]]$df_std),mean(fdf[[3]]$df_std)) # check the mean degrees of freedom
 
 #
 # knockout plots ####
 # across predictions
-ap=cp=list() # age plot, cohen's d plot lists
-for(i in 1:length(explain)){
-  cp[[i]]=anatpn(explain[[i]])
-  ap[[i]]=anatp2n(explain[[i]])
-}
-a=ggarrange(plotlist = ap,ncol=1,common.legend = T,legend = "bottom")
-b=ggarrange(plotlist = cp,ncol=1,common.legend = T,legend = "bottom")
-pknock=ggarrange(a,b)
-ggsave("results/knock.pdf",pknock,width=7,height = 4)
-ggsave("results/knock.jpg",pknock,width=7,height = 4)
+cp=anatpn(explain[[1]])
+ap=anatp2n(explain[[1]])
+pknock=ggarrange(cp,ap,ncol=1)
+pknock = annotate_figure(pknock, top = text_grob(paste("Knockout effect by region", sep=""), color = "black", face = "bold", size = 14)) # give figs a title
+ggsave(paste(savepath,"knock.pdf",sep=""),pknock,width=6,height = 5)
+ggsave(paste(savepath,"knock.jpg",sep=""),pknock,width=6,height = 5)
 #
 #
 # age stratefied
