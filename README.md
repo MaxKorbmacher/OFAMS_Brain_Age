@@ -98,7 +98,7 @@ See for that first the corrected BAG differences between MS and HC (paired sampl
 We see clear differences between the outlined group differences, where corrected brain ages produce larger effect sizes differentiating healthy controls and MS patients.
 
 ## Explainability
-An important advantage of the utilzed GAM is that the model coefficients can be fairly easily interpreted using ANOVA test, the respective degrees of freedom and by knocking out regions by setting all feature values of a specific region to 0. See a summary of the findings below. The data used for the visualisation are the training data. However, lesion-styled interpretability is also possible in any unseen data by simpy setting the values of a single region to zero.
+An important advantage of the utilzed GAM is that the model coefficients can be fairly easily interpreted using ANOVA test, the respective degrees of freedom and by knocking out regions by setting all feature values of a specific region to 0 or varying the values for each region while holding the other regions constant. See a summary of the findings below. The data used for the visualisation are the training data. However, lesion-styled interpretability is also possible in any unseen data by simpy setting the values of a single region to zero.
 
 A few aspects soon to be added:
 Degrees of freedom per region
