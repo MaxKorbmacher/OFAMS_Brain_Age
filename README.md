@@ -101,15 +101,14 @@ We see clear differences between the outlined group differences, where corrected
 An important advantage of the utilzed GAM is that the model coefficients can be fairly easily interpreted using ANOVA test, the respective degrees of freedom and by knocking out regions by setting all feature values of a specific region to 0 or varying the values for each region while holding the other regions constant. See a summary of the findings below. The data used for the visualisation are the training data. However, lesion-styled interpretability is also possible in any unseen data by simpy setting the values of a single region to zero.
 
 A few aspects soon to be added:
-Degrees of freedom per region
-
-Feature weight maps
+Degrees of freedom per region and feature weight maps
+![imp_df](https://github.com/user-attachments/assets/01849aeb-f422-4e39-b712-df784aad3ed6)
 
 Knockout importance
+![knock](https://github.com/user-attachments/assets/3984a13e-c650-4cf5-862c-cb0e365d866e)
 
 Individual level variability
 ![single_sub](https://github.com/user-attachments/assets/7a353fd5-b83f-4eb1-863d-04b163e23d00)
-
 
 
 ## Results
