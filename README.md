@@ -51,10 +51,10 @@ We also want to highlight that hemisphere-specific models perform similar to mod
 
 |    Sample and BA    | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
 | :---------: |   :---------: |  :---: |  :---: |  :---: |
-|Training u   |   0.956750671687792|0.915371847775041|5.09349719782765|6.50127671123974|
-|Training c   |   0.963398170008129|0.928136033975012|4.89328500185453|6.21857468360546|
-|Test u |   0.962232357394819|0.925891109617591|5.28268535093494|6.82924637097514|
-|Test c |   0.967967842137675|0.936961743412667|5.20338122552432|6.65083281740381|
+|Training u   |   0.9568|0.9154|5.0935|6.5013|
+|Training c   |   0.9634|0.9281|4.8933|6.2186|
+|Test u |   0.9622|0.9259|5.2827|6.8292|
+|Test c |   0.9680|0.9370|5.2034|6.6508|
 
 (R2 = Variance explained, MAE = Mean Absolute Error, RMSE = Root Mean Squared Error)
 
@@ -63,22 +63,22 @@ Fit in external validation data, which are all healthy controls (N = 751, mean a
 
 | Sample & Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
 |  :----------------------: | :---------: |  :---: |  :---: |  :---: |
-|   Validation u    | 0.756129919604673|0.571732455321369|5.98370121165647|7.53618066884458|
-|    Validation c    | 0.784920399082748|0.616100032896221|5.96605257239848|7.45480676141757|
+|   Validation u    | 0.7561|0.5717|5.9837|7.5362|
+|    Validation c    | 0.7849|0.6161|5.9662|7.4548|
 
 An example of data fit for a single disease group, here multiple sclerosis patients (N = 748, mean age=38.63±9.46, range: 18.46-70.34):
 
 | Sample $ Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
 |  :----------------------: | :---------: |  :---: |  :---: |  :---: |
-|    MS u    | 0.462637902532409|0.214033828859586|10.4082787109805|12.4969539450843|
-|    MS c    | 0.535708898309448|0.286984023727923|9.58081588153022|11.5616606943567|
+|    MS u    | 0.4626|0.2140|10.4083|12.4970|
+|    MS c    | 0.5357|0.2870|9.5808|11.5617|
 
 Finally, we were interested in how our model performs in longitudinal data looking at three healthy individuals scanned in total 103 times over a 1.5 years period (mean age per subject: 30.66, 28.09, 40.66).
 |Subject|	Uncorrected BA Pearson's r|	p	| Corrected BA Pearson's r|	p	|
 | :---: |:---: |:---: |:---: |:---: |
-|sub-1 u	|0.22320709	|0.177966078|	0.246593076|	0.135573488	|
-|sub-2 u	|0.208588882|	0.196474389|0.229019752|	0.155174112	|
-|sub-3 u	|0.523604727|	0.007226934	|0.530987825|	0.006313065	|
+|sub-1 u	|0.2232	|0.1780|	0.2466|	0.1356	|
+|sub-2 u	|0.2086|	0.1965|0.2290|	0.1552	|
+|sub-3 u	|0.5236|	0.0072	|0.5310|	0.0063	|
 
 
 Longitudinal results suggest better individual-level model fit than previous models (e.g., https://doi.org/10.1002/brb3.3219).
