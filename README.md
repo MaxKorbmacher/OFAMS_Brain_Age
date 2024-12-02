@@ -102,9 +102,14 @@ An important advantage of the utilzed GAM is that the model coefficients can be 
 
 A few aspects soon to be added:
 Degrees of freedom per region
+
 Feature weight maps
+
 Knockout importance
+
 Individual level variability
+![single_sub](https://github.com/user-attachments/assets/7a353fd5-b83f-4eb1-863d-04b163e23d00)
+
 
 
 ## Results
