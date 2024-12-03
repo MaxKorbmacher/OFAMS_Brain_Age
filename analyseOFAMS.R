@@ -14,7 +14,7 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load(haven,car,dplyr,lme4,lmerTest,ggeffects,sjPlot,
                data.table,factoextra,simputation,ggpubr,psych,reshape2,
                gplots,rstatix,ggseg,marginaleffects,MuMIn,tidyr,#glmnet,ipflasso,parameters,
-               olsrr,parallel)
+               olsrr,parallel,gghighlight)
 #
 #
 # load data
@@ -208,11 +208,13 @@ BAG_descriptive = ggplot(data= df2, aes(x = session, y = BAG_c)) +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
 ggsave(paste(savepath,"BAG_descriptive.pdf",sep=""),BAG_descriptive)
+df%>%group_by(session)%>%summarize(M=mean(na.omit(edss)))
 df3 = filter(df,session == 0 | session == 6 | session == 12 |session == 18 |session == 24)
-EDSS_descriptive = ggplot(data= df3, aes(x = session, y = edss)) + 
+level_order = c(0,6,12,18,24)
+EDSS_descriptive = ggplot(data= df3, aes(x = factor(session,level=level_order), y = edss)) + 
   geom_point(size = 1.5, alpha= 1, color = "gray85") +
   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
-  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  stat_smooth(aes(group = 1),color="red",fill = "red", method = "lm")+ #
   ylab("EDSS") + xlab("Session (months)") +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
@@ -377,19 +379,149 @@ t.test(as.numeric(gsub(",",".",demo10$BL_BMI)), as.numeric(gsub(",",".",demo10$B
 #
 # paced auditory serial addition test (PASAT). 
 t.test(demo10$PASAT_OFAMS10,demo10$BL_PASATcorrect,paired = T) # PASAT score decreases
-mean(na.omit(demo10$BL_PASATcorrect))
-mean(na.omit(demo10$PASAT_OFAMS10))
+# However, the simple t-test does not consider the fluctuations in PASAT scores over time - we need LMMs
+pasat1 = demo10%>%select(Patnr,sex,BL_PASATcorrect,PASAT_24M, PASAT_OFAMS10)
+pasat1 = melt(pasat1,id.vars = c("Patnr","sex"))
+names(pasat1) = c("eid","sex","session","PASAT")
+pasat1$session=as.numeric(pasat1$session)
+pasat1$session=ifelse(as.numeric(pasat1$session) == 1,0,pasat1$session)
+pasat1$session=ifelse(as.numeric(pasat1$session) == 2,24,pasat1$session)
+pasat1$session=ifelse(as.numeric(pasat1$session) == 3,120,pasat1$session)
+pasat1$session=factor(pasat1$session)
+pasat1 = data %>% select(eid,session,age) %>% right_join(pasat1, by = c("eid","session"))
+pasat1 = na.omit(pasat1)
+# mml = lmer(PASAT ~ session + age + sex + (1|eid),pasat1)
+# summary(mml)
+# pasat1$PASAT_corrected = predict(mml,pasat1)
+
+# hist((demo10$PASAT_OFAMS10 - demo10$BL_PASATcorrect)/12)
+# median(na.omit(demo10$edss_month_120 - demo10$edss_baseline))
+# mean(na.omit(demo10$BL_PASATcorrect))
+# mean(na.omit(demo10$PASAT_24M))
+# mean(na.omit(demo10$PASAT_M24_extra))
+# mean(na.omit(demo10$PASAT_OFAMS10))
+# 
+# mean(na.omit(demo10$edss_baseline))
+# median(na.omit(demo10$edss_month_120))
 cohens_d(rbind(data.frame(session="0",pasat=demo10$BL_PASATcorrect),
                data.frame(session="120",pasat=demo10$PASAT_OFAMS10)),
          pasat~session, ref.group="120", paired=T, ci=T)
-demo10$pasat_ARC = (demo10$PASAT_OFAMS10-demo10$BL_PASATcorrect)/12
+demo10$pasat_ARC = (demo10$PASAT_OFAMS10-demo10$BL_PASATcorrect)/14
 #
+edss_df0 = demo10%>% select(eid,Age_OFAMS10,edss_month_120,sex)
+edss_df0$session = "144"
+names(edss_df0) = c("eid", "age", "edss", "sex", "session")
+edss_df = df3 %>% select(eid, age, edss, sex, session)
+edss_df = rbind(edss_df,edss_df0)
+# IMPORTANT: FILTER EMPTY DATA!!
+edss_df = edss_df %>% filter(!eid == 403) %>% filter(!eid == 807) %>% filter(!eid == 1106)%>% filter(!eid == 1408)
+level_order = c(0,6,12,18,24,144)
+# we estimate missing ages
+a = ifelse((edss_df %>% filter(session == 0))$age %>% is.na == F, (edss_df %>% filter(session == 0))$age, (edss_df %>% filter(session == 6))$age - 0.5)
+a = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 12))$age - 1)
+a = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 18))$age - 1.5)
+a = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 24))$age - 2)
+a = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 144))$age - 12)
+a1 = edss_df %>% filter(session == 0)
+a1$age = a
+
+b = ifelse((edss_df %>% filter(session == 6))$age %>% is.na == F, (edss_df %>% filter(session == 0))$age, (edss_df %>% filter(session == 0))$age + 0.5)
+b = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 12))$age - 0.5)
+b = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 18))$age - 1)
+b = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 24))$age - 1.5)
+b = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 144))$age - 11.5)
+b1 = edss_df %>% filter(session == 6)
+b1$age = b
+
+c = ifelse((edss_df %>% filter(session == 12))$age %>% is.na == F, (edss_df %>% filter(session == 0))$age, (edss_df %>% filter(session == 0))$age + 1)
+c = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 6))$age + 0.5)
+c = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 18))$age - 0.5)
+c = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 24))$age - 1)
+c = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 144))$age - 11)
+c1 = edss_df %>% filter(session == 12)
+c1$age = c
+
+d = ifelse((edss_df %>% filter(session == 18))$age %>% is.na == F, (edss_df %>% filter(session == 0))$age, (edss_df %>% filter(session == 0))$age + 1.5)
+d = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 6))$age + 1)
+d = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 12))$age + 0.5)
+d = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 24))$age - 0.5)
+d = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 144))$age - 10.5)
+d1 = edss_df %>% filter(session == 18)
+d1$age = d
+
+e = ifelse((edss_df %>% filter(session == 24))$age %>% is.na == F, (edss_df %>% filter(session == 0))$age, (edss_df %>% filter(session == 0))$age + 2)
+e = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 6))$age + 1.5)
+e = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 12))$age + 1)
+e = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 18))$age + 0.5)
+e = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 144))$age - 10)
+e1 = edss_df %>% filter(session == 24)
+e1$age = e
+
+f = ifelse((edss_df %>% filter(session == 144))$age %>% is.na == F, (edss_df %>% filter(session == 0))$age, (edss_df %>% filter(session == 0))$age + 12)
+f = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 6))$age + 11.5)
+f = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 12))$age + 11)
+f = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 18))$age + 10.5)
+f = ifelse(a%>%is.na()== F, a, (edss_df %>% filter(session == 24))$age + 10)
+f1 = edss_df %>% filter(session == 144)
+f1$age = f
+edss_df=rbind(a1,b1,c1,d1,e1,f1) #bind it
+edss_df = na.omit(edss_df)
+#
+# to estimate the age and sex adjusted EDSS score, we use an LME
+mml = lmer(edss ~ session + age + sex + (1|eid),edss_df[edss_df$eid %in% (edss_df %>% filter(session ==144 & edss>=4 | session ==24 & edss>4))$eid,])
+# show the raw difference in EDSS score:
+edss_df %>% filter(session == 144 & edss>=4) %>% summarize(mean(edss)) -edss_df[edss_df$eid %in% (edss_df %>% filter(session ==144 & edss>=4))$eid,]%>% filter(session ==0) %>% summarize(mean(edss))
+#
+cofff=summary(mml)$coefficients[6]
+e1 = ggplot(data= edss_df, aes(x = factor(session,level=level_order), y = edss)) + 
+  geom_line(aes(group = eid), color = "grey50") + gghighlight(max(edss)>=4,use_direct_label = F) +
+  geom_point(size = 1.5, alpha= 1, color = "grey50") + 
+  stat_smooth(aes(group = 1),color="red",fill = "red", method = "lm")+ #
+  ylab("EDSS") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.8,color="blue")+ # geom = "pointrange"
+  theme_bw() + annotate("text",x=3,y=8,label= paste("Adjusted 10-year difference=",round(cofff,2)),cex=4) + 
+  ggtitle("Reached EDSS≥4")
+mml2 = lmer(edss ~ session + age + sex + (1|eid),edss_df[edss_df$eid %in% (edss_df %>% filter(session ==144 & edss<=4))$eid,])
+cofff=summary(mml2)$coefficients[6]
+e2 = ggplot(data= edss_df, aes(x = factor(session,level=level_order), y = edss)) + 
+  geom_line(aes(group = eid), color = "grey50") + gghighlight(max(edss)<4,use_direct_label = F) +
+  geom_point(size = 1.5, alpha= 1, color = "grey50") + 
+  stat_smooth(aes(group = 1),color="red",fill = "red", method = "lm")+ #
+  ylab("EDSS") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.8,color="blue")+ # geom = "pointrange"
+  theme_bw() + annotate("text",x=3,y=8,label= paste("Adjusted 10-year difference =",round(cofff,2)),cex=4) + 
+  ggtitle("Did not reach EDSS≥4")
+EDSS_descriptive = ggarrange(e1,e2)
+# col = ifelse(edss_df$edss>=4,"red","gray85")
+# EDSS_descriptive = ggplot(data= edss_df, aes(x = factor(session,level=level_order), y = edss)) + 
+#   geom_point(size = 1.5, alpha= 1, color = "gray85") +
+#   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+#   stat_smooth(aes(group = 1),color="red",fill = "red", method = "lm")+ #
+#   ylab("EDSS") + xlab("Session (months)") +
+#   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+#   theme_bw()
+ggsave(paste(savepath,"EDSS_descriptive.pdf",sep=""),EDSS_descriptive, width = 9, height = 4)
+#
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
 # timed 25-foot walk test (T25FW) at 24 and 120 months
 t.test(as.numeric(gsub(",",".",demo10$T_25FW_2)), as.numeric(gsub(",",".",demo10$T_25FW_1)), paired = T) # sig differences in T25FW
 cohens_d(rbind(data.frame(session="24",T_25FW=as.numeric(gsub(",",".",demo10$T_25FW_1))),
                data.frame(session="120",T_25FW=as.numeric(gsub(",",".",demo10$T_25FW_2)))),
          T_25FW~session, ref.group="120", paired=T, ci=T)
-demo10$T_25FW_ARC = (as.numeric(gsub(",",".",demo10$T_25FW_2))-as.numeric(gsub(",",".",demo10$T_25FW_1)))/10
+demo10$T_25FW_ARC = (as.numeric(gsub(",",".",demo10$T_25FW_2))-as.numeric(gsub(",",".",demo10$T_25FW_1)))/14
 #
 # check proms (show no difference between BL and FU) [BL to 24 months]
 df1 = df %>% filter(session==0)
