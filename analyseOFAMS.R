@@ -152,15 +152,76 @@ heatmap(x = x, col = col, symm = TRUE)
 print("The heatmap underscores the findings by Hobart et al. (2001) https://doi.org/10.1136/jnnp.71.3.363 that the subscale sum scores are not that straight forward.")
 print("We will anyways go ahead with summing into 8 categories.")
 # add proms sum scores (for interpretability divided by nb of item per category)
+# first, the proms have to be transformed into percentage scores
+trans1 = function(spm){
+  a = ifelse(spm == 1,100,spm)
+  a = ifelse(a == 2,75,a)
+  a = ifelse(a == 3,50,a)
+  a = ifelse(a == 4,25,a)
+  a = ifelse(a == 5,0,a)
+  return(a)
+}
+translist1 = c("spm1","spm2","spm6","spm8","spm11b","spm11d")
+for(i in 1:length(translist1)){
+  data[grep(paste("^",translist1[i],"$",sep=""), colnames(data))] = c(as.integer(trans1(unlist(data[grep(paste("^",translist1[1],"$",sep=""), colnames(data))]))))
+}
+trans2 = function(spm){
+  a = ifelse(spm == 1,0,spm)
+  a = ifelse(a == 2,50,a)
+  a = ifelse(a == 3,100,a)
+  return(a)
+}
+translist2 = data %>% select(contains("spm3")) %>% names()
+for(i in 1:length(translist2)){
+  data[grep(paste("^",translist2[i],"$",sep=""), colnames(data))] = c(as.integer(trans2(unlist(data[grep(paste("^",translist2[1],"$",sep=""), colnames(data))]))))
+}
+trans3 = function(spm){
+  a = ifelse(spm == 1,100,spm)
+  a = ifelse(a == 2,80,a)
+  a = ifelse(a == 3,60,a)
+  a = ifelse(a == 4,40,a)
+  a = ifelse(a == 5,20,a)
+  a = ifelse(a == 6,0,a)
+  return(a)
+}
+translist3 = c("spm4b", "spm4d","spm9d", "spm9e", "spm9h")
+for(i in 1:length(translist3)){
+  data[grep(paste("^",translist3[i],"$",sep=""), colnames(data))] = c(as.integer(trans3(unlist(data[grep(paste("^",translist3[1],"$",sep=""), colnames(data))]))))
+}
+trans4 = function(spm){
+  a = ifelse(spm == 1,0,spm)
+  a = ifelse(a == 2,20,a)
+  a = ifelse(a == 3,40,a)
+  a = ifelse(a == 4,60,a)
+  a = ifelse(a == 5,80,a)
+  a = ifelse(a == 6,100,a)
+  return(a)
+}
+translist3 = c("spm9b", "spm9c", "spm9f", "spm9g", "spm9i")
+for(i in 1:length(translist3)){
+  data[grep(paste("^",translist3[i],"$",sep=""), colnames(data))] = c(as.integer(trans4(unlist(data[grep(paste("^",translist3[1],"$",sep=""), colnames(data))]))))
+}
+trans5 = function(spm){
+  a = ifelse(spm == 1,0,spm)
+  a = ifelse(a == 2,25,a)
+  a = ifelse(a == 3,50,a)
+  a = ifelse(a == 4,75,a)
+  a = ifelse(a == 5,100,a)
+  return(a)
+}
+translist3 = c("spm10","spm11a","spm11c")
+for(i in 1:length(translist3)){
+  data[grep(paste("^",translist3[i],"$",sep=""), colnames(data))] = c(as.integer(trans5(unlist(data[grep(paste("^",translist3[1],"$",sep=""), colnames(data))]))))
+}
 # note that the scale levels differ and absolute sum scores have to be used.
-data$PF = data%>%select(contains("spm3")) %>% rowSums() # Physical functioning (PF)
-data$RF = data%>%select(contains("spm4")) %>% rowSums() # Role-physical (RF)
-data$BP = data%>%select(spm7,spm8) %>% rowSums() # Bodily pain (BP)
-data$GH = data%>%select(spm1,contains("spm11")) %>% rowSums() # General health (GH)
-data$VT = data%>%select(spm9a,spm9b,spm9c,spm9d) %>% rowSums() # Vitality (VT)
-data$SF = data%>%select(spm6,spm10) %>% rowSums() # Social functioning (SF)
-data$RE = data%>%select(contains("spm5")) %>% rowSums() # Role-emotional (RE)
-data$MH = data%>%select(spm9b, spm9c, spm9d, spm9f, spm3h) %>% rowSums() # Mental health (MH)
+data$PF = data%>%select(contains("spm3")) %>% rowSums()/10 # Physical functioning (PF)
+data$RF = data%>%select(contains("spm4")) %>% rowSums()/4 # Role-physical (RF)
+data$BP = data%>%select(spm7,spm8) %>% rowSums()/3 # Bodily pain (BP)
+data$GH = data%>%select(spm1,contains("spm11")) %>% rowSums()/4 # General health (GH)
+data$VT = data%>%select(spm9a,spm9b,spm9c,spm9d) %>% rowSums()/5 # Vitality (VT)
+data$SF = data%>%select(spm6,spm10) %>% rowSums()/2 # Social functioning (SF)
+data$RE = data%>%select(contains("spm5")) %>% rowSums()/2 # Role-emotional (RE)
+data$MH = data%>%select(spm9b, spm9c, spm9d, spm9f, spm3h) %>% rowSums()/5 # Mental health (MH)
 #
 # correlation matrices of variables of interest
 visits = c("0","6","12","24") # at 120 months follow-up, there are no clinical measures taken.
@@ -184,6 +245,7 @@ data %>% group_by(session) %>% summarize(N=length(na.omit((BAG))))
 print("We combat these problems in the representation of initial descriptives by excluding duplicates and low-N sessions.")
 df2 = filter(df,session == 0 | session == 6 | session == 24 |session == 120)
 print("All time points.")
+df$session
 ggplot(df, aes(session, BAG_c, group = eid, color = ""))+ #geom_point() + 
   geom_line() + scale_colour_manual(values = c("brown")) +
   theme_classic() + theme(legend.position = "none")
@@ -200,6 +262,7 @@ ggplot(data= df, aes(x = session, y = BAG_c)) +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
 print("Only time points with sufficient data.")
+
 BAG_descriptive = ggplot(data= df2, aes(x = session, y = BAG_c)) + 
   #scale_shape_manual(values=1:nlevels(factor(df2$eid))) +
   geom_point(size = 1.5, alpha= 1, color = "gray85") + #,  aes(color = eid) colour points by group # shape by eid aes(shape=factor(eid)),
@@ -552,7 +615,6 @@ e2 = ggplot(data= pasat1, aes(x = factor(session,level=level_order), y = PASAT))
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.8,color="blue")+ # geom = "pointrange"
   theme_bw() + annotate("text",x=2,y=65,label= paste("Adjusted 10-year difference=",round(cofff,2),"N =",pasat_ids),cex=4) + 
   ggtitle("Reached PASAT≤40")
-
 ggarrange(e1,e2)
 # check N in stratified group
 pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<=40 | session ==24 & PASAT<=40))$eid,] %>% group_by(session) %>% summarize(N = length(session))
@@ -651,15 +713,18 @@ cor.test(demo10$relapses_12mnths_before_baseline,demo10$Cum_relapses,use="na.or.
 # cor(demo10$Cum_relapses, demo10$edss_month_24,use="na.or.complete")
 # cor(demo10$Cum_relapses, demo10$EDSS_10_short,use="na.or.complete")
 #
-# correlations of PROMS and relapses
-prom$PF = prom%>%select(contains("spm3")) %>% rowSums() # Physical functioning (PF)
-prom$RF = prom%>%select(contains("spm4")) %>% rowSums() # Role-physical (RF)
-prom$BP = prom%>%select(spm7,spm8) %>% rowSums() # Bodily pain (BP)
-prom$GH = prom%>%select(spm1,contains("spm11")) %>% rowSums() # General health (GH)
-prom$VT = prom%>%select(spm9a,spm9b,spm9c,spm9d) %>% rowSums() # Vitality (VT)
-prom$SF = prom%>%select(spm6,spm10) %>% rowSums() # Social functioning (SF)
-prom$RE = prom%>%select(contains("spm5")) %>% rowSums() # Role-emotional (RE)
-prom$MH = prom%>%select(spm9b, spm9c, spm9d, spm9f, spm3h) %>% rowSums() # Mental health (MH)
+# # correlations of PROMS and relapses
+# prom$PF = prom%>%select(contains("spm3")) %>% rowSums() # Physical functioning (PF)
+# prom$RF = prom%>%select(contains("spm4")) %>% rowSums() # Role-physical (RF)
+# prom$BP = prom%>%select(spm7,spm8) %>% rowSums() # Bodily pain (BP)
+# prom$GH = prom%>%select(spm1,contains("spm11")) %>% rowSums() # General health (GH)
+# prom$VT = prom%>%select(spm9a,spm9b,spm9c,spm9d) %>% rowSums() # Vitality (VT)
+# prom$SF = prom%>%select(spm6,spm10) %>% rowSums() # Social functioning (SF)
+# prom$RE = prom%>%select(contains("spm5")) %>% rowSums() # Role-emotional (RE)
+# prom$MH = prom%>%select(spm9b, spm9c, spm9d, spm9f, spm3h) %>% rowSums() # Mental health (MH)
+
+prom = right_join(prom,data %>% select(eid,session,PF,RF,BP,GH,VT,SF,RE,MH),by = c("eid","session"))
+
 demo10$eid = demo10$Patnr
 prom = prom %>% filter(session == 0) # select only baseline measure (there is anyways no change)
 prom = right_join(demo10,prom, by="eid")
@@ -756,7 +821,6 @@ prom = right_join(l,prom,by="eid")
 BL_blood = blood %>% filter(Visit.nr==0)
 BL_blood$eid=BL_blood$Sub
 prom=right_join(prom,BL_blood,by="eid")
-
 # 2.1 All Ordinary least squares ####
 # Reasoning: identify most influential variables
 # For that, use leave one out CV
@@ -1009,11 +1073,18 @@ write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
 #
 #
 # 3.1 Brain age changes ####
+data = read.csv("/Users/max/Documents/Local/MS/GAM_preds.csv") # contains brain age predictions
+mod1 = lmer(corrected_brainage~factor(session)+age+(1|eid),data=data)
+summary(mod1)
+
+
 # mod1 = lmer(BAG_c~session+sex+geno+age+(age||eid),data=data) # Convergence issues
 # mod = lmer(BAG_c~session+sex+geno+age+(1|eid)+(0+age|eid),data=data) # Convergence issues
 mod1 = lmer(BAG_c~session+sex+geno+age+(0+age|eid),data=data)
+
 mod2 = lmer(BAG_c~session+sex+geno+(0+age|eid),data=data)
 mod3 = lmer(BAG_c~session+sex+geno+age+(1|eid),data=data)
+summary(mod3)
 anova(mod1,mod2,mod3) # mod3 is better than the other models
 #
 summary(mod3) # geno and age seem interesting
@@ -1049,9 +1120,8 @@ mod9 = lmer(BAG_c~session+sex+geno+age+edss+PF+RF+BP+GH+VT+(1|eid),data=data)
 mod10 = lmer(BAG_c~session+sex+geno+age+edss+PF+RF+BP+GH+VT+SF+(1|eid),data=data)
 mod11 = lmer(BAG_c~session+sex+geno+age+edss+PF+RF+BP+GH+VT+SF+RE+(1|eid),data=data)
 mod12 = lmer(BAG_c~session+sex+geno+age+edss+PF+RF+BP+GH+VT+SF+RE+MH+(1|eid),data=data)
-anova(mod5.1,mod5.2,mod6,mod7,mod8,mod9,mod10,mod11,mod12)
-summary(mod7)
-sjPlot::plot_model(mod7, pred.type="re", ci.lvl=.95) # BP effect the wrong way, false positive
+#anova(mod5.1,mod5.2,mod6,mod7,mod8,mod9,mod10,mod11,mod12)
+#sjPlot::plot_model(mod7, pred.type="re", ci.lvl=.95) # BP effect the wrong way, false positive
 # After all, only genotype matters! (no proms, no edss)
 #
 # 3.2 Brain change ####
