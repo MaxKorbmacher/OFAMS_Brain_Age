@@ -47,7 +47,7 @@ for (i in 1:length(full_vec)){
   coeflist[[i]]=coefs
   coeflist[[i]]$Names = rownames(coeflist[[i]])
 }
-print("Extracting paramters for meta-analytic stats.")
+print("Extracting parameters for meta-analytic stats.")
 # make a list of all predictors which we can then look at in terms of effect size / beta coefficient
 allpreds=c(predictors,"sex","Age_BL_OFAMS", "Vit_A_0", "Vit_D_0", "Vit_E_0","TotalVol", "TIV")
 res=temp=list()

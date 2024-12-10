@@ -144,6 +144,13 @@ edit_plots_in_place <- function(names, env, scale) {
   })
 }
 # 1.1 Descriptives ####
+# age
+mean(na.omit(demo10$Age_BL_OFAMS)) # BL
+sd(na.omit(demo10$Age_BL_OFAMS))
+mean(na.omit(demo10$Age_OFAMS10)) # 10 year follow-up
+sd(na.omit(demo10$Age_OFAMS10))
+# sex
+table(demo10$sex)
 
 # correlation matrix of proms
 x = cor(data%>%select(contains("spm")),use = "complete.obs")
@@ -862,7 +869,7 @@ prom=prom%>%select(-Sex_OFAMS10,-sex)
 jj=left_join(edss_df %>% filter(session==0),pasat1 %>% filter(session==0) %>% select(eid,PASAT), by="eid")
 prom=left_join(jj,prom,by="eid")
 prom = prom %>% select(eid,FLG,age,sex,edss,PASAT,geno,relapses_12mnths_before_baseline,
-                       CH3L.1..mg.ml..mean,NfL..pg.ml.,smoking_OFAMS,Mean_BMI_OFAMS,
+                       CH3L.1..mg.ml..mean,NfL..pg.ml.,smoking_OFAMS,BL_BMI,
                        Treatment_OFAMS,Omega3_suppl,baselineC,baselineV,
                        PF,RF,BP,GH,VT,SF,RE,MH,Vit_A_0,Vit_D_0,Vit_E_0)
 
@@ -1076,7 +1083,6 @@ write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
 data = read.csv("/Users/max/Documents/Local/MS/GAM_preds.csv") # contains brain age predictions
 mod1 = lmer(corrected_brainage~factor(session)+age+(1|eid),data=data)
 summary(mod1)
-
 
 # mod1 = lmer(BAG_c~session+sex+geno+age+(age||eid),data=data) # Convergence issues
 # mod = lmer(BAG_c~session+sex+geno+age+(1|eid)+(0+age|eid),data=data) # Convergence issues
