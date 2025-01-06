@@ -114,8 +114,4 @@ Individual level variability
 ## Results
 The results will soon be presented in a pre-print and following scientific publication.
 
-## References
-
-[1]	Leonardsen, E. H. et al. Deep neural networks learn general and clinically relevant representations of the ageing brain. NeuroImage 256, 119210 (2022).
-
 
