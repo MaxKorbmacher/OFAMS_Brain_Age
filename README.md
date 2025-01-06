@@ -112,7 +112,7 @@ Individual level variability
 
 
 ## Results
-Need to be added.
+The results will soon be presented in a pre-print and following scientific publication.
 
 ## References
 
