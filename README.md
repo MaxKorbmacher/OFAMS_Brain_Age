@@ -1,9 +1,9 @@
 # OFAMS longitudinal analysis of brain age
 Analyses on the longitudinal OFAMS (ω-3 Fatty Acid Treatment in Multiple Sclerosis (MS)) MRI data using Brain Age.
 
-We start with explaining the _cortical_ brainage model and how apply it to your own data.
+We start with explaining the _cortical_ brainage model and how to apply it to your own data.
 
-Then, more study-specific details are being described.
+Then, more OFAMS data/study-specific details are being described.
 
 ## The utilized brain age model: How to apply it to your own data?
 1. After the FreeSurfer recon-all call or similar, e.g. using FastSurfer, tabular information are available per subject. We use the averages of the parcels of the Desikan-Killiany atlas as specified in the FreeSurfer output per subject.
