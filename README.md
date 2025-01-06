@@ -68,7 +68,7 @@ Fit in external validation data, which are all healthy controls (N = 751, mean a
 
 An example of data fit for a single disease group, here multiple sclerosis patients (N = 748, mean age=38.63±9.46, range: 18.46-70.34):
 
-| Sample $ Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
+| Sample & Correction | Pearson's r	|   R2   |	 MAE  |	 RMSE  |
 |  :----------------------: | :---------: |  :---: |  :---: |  :---: |
 |    MS u    | 0.4626|0.2140|10.4083|12.4970|
 |    MS c    | 0.5357|0.2870|9.5808|11.5617|
