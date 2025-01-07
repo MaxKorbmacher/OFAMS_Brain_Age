@@ -106,7 +106,7 @@ Degrees of freedom per region and feature weight maps showing the non-linearity 
 Knockout importance (setting all features in a region = 0 across the entire sample)
 ![knock](https://github.com/user-attachments/assets/3984a13e-c650-4cf5-862c-cb0e365d866e)
 
-Individual level variability (setting single features = 0 in subjects with most accurate brain age predictions [the results are constant across age groups]) 
+Individual level variability (each feature can range from the minimum to the maximum observed value in the training sample in subjects with most accurate brain age predictions. The value for the region is correlated with the resulting brain age [Note: the results are constant across age groups]) 
 ![single_sub](https://github.com/user-attachments/assets/7a353fd5-b83f-4eb1-863d-04b163e23d00)
 
 
