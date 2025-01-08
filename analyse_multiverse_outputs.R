@@ -17,8 +17,9 @@ library(ggforce)
 # model info
 model_info = read.csv("/Users/max/Documents/Local/MS/results/EDSS_model_info_optimised.csv")
 model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "FLG")
-pwr = read.csv("/Users/max/Documents/Local/MS/OFAMS_Brain_Age/ALL_power.csv")
-model_info$Power = pwr$Power
+pwr = read.csv("/Users/max/Documents/Local/MS/results/power.csv")
+model_info$Power = pwr$x
+#write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
 rm(pwr)
 # parameter info
 coef_table = read.csv("/Users/max/Documents/Local/MS/results/EDSS_stratification_optimised.csv")
@@ -27,9 +28,10 @@ coef_table = read.csv("/Users/max/Documents/Local/MS/results/EDSS_stratification
 #
 # First, some general information from the model_info object
 paste("Recap. The number of models run was ", nrow(model_info), " with ", round(sum(ifelse(model_info$McFaddenR2>.2,1,0))/nrow(model_info)*100,2), "% showing an excellent model fit.", sep="")
+paste("Good model fit (R2>10%): ", round(sum(ifelse(model_info$McFaddenR2>.1,1,0))/nrow(model_info)*100,2), "%.", sep="")
 paste("Median McFadden pseudo R2 = ",round(median(model_info$McFaddenR2),2),"±",round(mad(model_info$McFaddenR2),2),sep="")
 # Second, we can remove mis-specified models for the same display
-paste("Now, we look only at well")
+paste("Now, we look only at well-powered models.")
 #
 # Duplicate rows and extract predictor names
 model_info$Formula = as.character(c(model_info$Formula))
@@ -103,7 +105,7 @@ plot=ggforestplot::forestplot(
   se = Beta_MAD,
   xlab="Median odds ratio ± median absolute deviation",
   logodds = TRUE,
-  pvalue = P_Md,
+  #pvalue = P_Md,
   psignif = .05
 )+
   ggforce::facet_col(
@@ -111,7 +113,7 @@ plot=ggforestplot::forestplot(
     scales = "free_y",
     space = "free"
   )
-plot=annotate_figure(plot,top = "Predictors of functional loss group membership")
+#plot=annotate_figure(plot,top = "Predictors of functional loss group membership")
 ggsave(plot = plot, filename = "/Users/max/Documents/Local/MS/results/FDG_multiverse.pdf", width = 8, height = 8)
 #
 # make Odds ratio table
@@ -130,9 +132,9 @@ l$Names = gsub("geno", "HLA-DRB1 carrier", l$Names)
 l$Names = gsub("CH3L.1..mg.ml..mean", "Chitinase-3 like-protein-1 mg/ml", l$Names)
 l$Names = gsub("BL_BMI", "Body Mass Index", l$Names)
 l$Names = gsub("edss_baseline", "EDSS", l$Names)
-l$Names = gsub("Vit_A_0", "Vitamin A mcmol/L", l$Names)
-l$Names = gsub("Vit_D_0", "Vitamin D mcmol/L", l$Names)
-l$Names = gsub("Vit_E_0", "Vitamin E mcmol/L", l$Names)
+l$Names = gsub("Vit_A_0", "Vitamin A umol/L", l$Names)
+l$Names = gsub("Vit_D_0", "Vitamin D nmol/L", l$Names)
+l$Names = gsub("Vit_E_0", "Vitamin E umol/L", l$Names)
 l$Names = gsub("PF", "Physical functioning", l$Names)
 l$Names = gsub("RF", "Role-physical", l$Names)
 l$Names = gsub("BP", "Bodily pain", l$Names)
@@ -170,10 +172,17 @@ write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse.csv")
 #
 # Consider only well-powered models ####
 cor(coef_table$Power,coef_table$McFaddenR2,use = "pairwise.complete.obs") # just for my own interest: R2 and power correlation
-c1 = coef_table %>% dplyr::filter(Power >= 0.8)
-cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # slightly better correspondence between R2 and power
+# note, there is no correspondence when considering low-power outcomes
+c1 = coef_table %>% dplyr::filter(Power >= 0.8) # filter for power ≥ 80%
+cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # Now, there is a better correspondence between R2 and power
 l = mktable(c1)
 write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_well_powered.csv")
+
+# Consider only high R2 models ####
+c1 = coef_table %>% dplyr::filter(McFaddenR2>.2)
+cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # This time a negative correlation between R2 and power?!
+l = mktable(c1)
+write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_high_R2.csv")
 
 # Consider only well-powered and high R2 models ####
 c1 = c1 %>% dplyr::filter(McFaddenR2>.2)

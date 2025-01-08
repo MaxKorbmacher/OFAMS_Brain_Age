@@ -18,8 +18,8 @@ data = data_unique(data = data, select = eid)
 predictors <- c("geno", "relapses_12mnths_before_baseline", "CH3L.1..mg.ml..mean", 
                 "NfL..pg.ml.", "edss", "PASAT", "smoking_OFAMS", "BL_BMI", 
                 "Omega3_suppl", "BAG_c", "baselineC", "baselineV", 
-                "PF", "RF", "BP", "GH", "VT", "SF", "RE", "MH", "Vit_A_0", "Vit_D_0", 
-                "Vit_E_0") # "Treatment_OFAMS", 
+                "PF", "RF", "BP", "GH", "VT", "SF", "MH", "Vit_A_0", "Vit_D_0", 
+                "Vit_E_0") # "Treatment_OFAMS", "RE" >> variability = 0
 # Generate model formulas up to the 5th order to get an estimation of the probability of different events
 max_order <- 8
 all_combinations <- lapply(1:max_order, function(i) combn(predictors, i, simplify = FALSE))

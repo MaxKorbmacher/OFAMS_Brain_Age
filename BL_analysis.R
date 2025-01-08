@@ -57,7 +57,7 @@ demotab=function(var){
   SD_FLG = sd(unlist(na.omit(data%>%filter(FLG == 1))[var]))
   M_FSG = mean(unlist(na.omit(data%>%filter(FLG == 0))[var]))
   SD_FSG = sd(unlist(na.omit(data%>%filter(FLG == 0))[var]))
-  FLG.imp = lm(formula(paste(var,"~ FLG + sex")), data)
+  FLG.imp = lm(formula(paste(var,"~ FLG + sex + age")), data)
   B = summary(FLG.imp)$coefficients[2]
   SE = summary(FLG.imp)$coefficients[2,2]
   CI_low = B-1.96*SE

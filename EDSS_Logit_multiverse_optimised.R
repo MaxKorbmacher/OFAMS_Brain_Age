@@ -13,8 +13,8 @@ data <- read.csv("/Users/max/Documents/Local/MS/results/interrim_data.csv")
 predictors <- c("geno", "relapses_12mnths_before_baseline", "CH3L.1..mg.ml..mean", 
                 "NfL..pg.ml.", "edss", "PASAT", "smoking_OFAMS", "BL_BMI", 
                 "Omega3_suppl", "BAG_c", "baselineC", "baselineV", 
-                "PF", "RF", "BP", "GH", "VT", "SF", "RE", "MH", "Vit_A_0", "Vit_D_0", 
-                "Vit_E_0") # "Treatment_OFAMS", 
+                "PF", "RF", "BP", "GH", "VT", "SF", "MH", "Vit_A_0", "Vit_D_0", 
+                "Vit_E_0") # "Treatment_OFAMS", "RE" >> variability = 0
 
 # Generate model formulas
 max_order <- 8
