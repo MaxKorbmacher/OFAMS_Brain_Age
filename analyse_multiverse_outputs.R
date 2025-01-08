@@ -1,4 +1,4 @@
-# Analyse multiverse outputs
+# Analyse functionally stable or improving group (FSIG) vs functional loss group (FLG) multiverse outputs
 #
 # Max Korbmacher, 14 Nov 2024
 #
@@ -52,10 +52,9 @@ rm(model_info)
 # CONVERGANCE PROBLEMS ARE IGNORED BY THIS APPROACH!!
 #
 l = coef_table %>% group_by(Names)%>%dplyr::summarize(Beta_Md=median((Beta)), Beta_MAD = mad((Beta)), P_Md=median(P)) # estimate medians and MADs
-a = props(coef_table%>%group_by(Names),(exp(Beta))>1) # estimate proportions of effects towards a single direction.
-b = props(coef_table%>%group_by(Names),(exp(Beta))<1)
-l = merge(l,a,by="Names") # merge data keeping the correct order
-l = merge(l,b,by="Names")
+coef_table$bigger = ifelse(exp(coef_table$Beta)>1,1,0)
+bigger = coef_table%>%group_by(Names)%>%summarize("OR>1" = sum(bigger)/length(bigger))
+l = merge(l,bigger,by="Names") # merge data keeping the correct order
 l$Names = gsub("Age_BL_OFAMS", "Age", l$Names)
 l$Names = gsub("baselineV", "Lesion volume", l$Names)
 l$Names = gsub("baselineC", "Lesion count", l$Names)
@@ -65,16 +64,16 @@ l$Names = gsub("geno", "HLA-DRB1 carrier", l$Names)
 l$Names = gsub("CH3L.1..mg.ml..mean", "Chitinase-3 like-protein-1 mg/ml", l$Names)
 l$Names = gsub("BL_BMI", "Body Mass Index", l$Names)
 l$Names = gsub("edss_baseline", "EDSS", l$Names)
-l$Names = gsub("Vit_A_0", "Vitamin A mcmol/L", l$Names)
-l$Names = gsub("Vit_D_0", "Vitamin D mcmol/L", l$Names)
-l$Names = gsub("Vit_E_0", "Vitamin E mcmol/L", l$Names)
+l$Names = gsub("Vit_A_0", "Vitamin A umol/L", l$Names)
+l$Names = gsub("Vit_D_0", "Vitamin D nmol/L", l$Names)
+l$Names = gsub("Vit_E_0", "Vitamin E umol/L", l$Names)
 l$Names = gsub("PF", "Physical functioning", l$Names)
 l$Names = gsub("RF", "Role-physical", l$Names)
 l$Names = gsub("BP", "Bodily pain", l$Names)
 l$Names = gsub("GH", "General health", l$Names)
 l$Names = gsub("VT", "Vitality", l$Names)
 l$Names = gsub("SF", "Social functioning", l$Names)
-l$Names = gsub("RE", "Role-emotional", l$Names)
+#l$Names = gsub("RE", "Role-emotional", l$Names)
 l$Names = gsub("MH", "Mental health", l$Names)
 l$Names = gsub("BAG_c", "Brain age gap", l$Names)
 l$Names = gsub("NfL..pg.ml.", "Neurofilament light chain pg/ml", l$Names)
@@ -94,7 +93,7 @@ l$group = c("General", "Patient-reported outcome measures","General","Brain mark
   "Omics", "Brain markers", "Brain markers",
   "Patient-reported outcome measures", "Omics",
   "Intervention","Clinical markers","Patient-reported outcome measures",
-  "Clinical markers","Patient-reported outcome measures","Patient-reported outcome measures",
+  "Clinical markers","Patient-reported outcome measures",
   "General","General","Patient-reported outcome measures",
   "Patient-reported outcome measures", "Omics",
   "Omics", "Omics")
@@ -118,11 +117,10 @@ ggsave(plot = plot, filename = "/Users/max/Documents/Local/MS/results/FDG_multiv
 #
 # make Odds ratio table
 mktable = function(coef_table){
-l = coef_table %>% group_by(Names)%>%dplyr::summarize(Beta_Md=median(exp(Beta)), Beta_MAD = mad(exp(Beta)), P_Md=median(P)) # estimate medians and MADs
-a = props(coef_table%>%group_by(Names),(exp(Beta))>1) # estimate proportions of effects towards a single direction.
-b = props(coef_table%>%group_by(Names),(exp(Beta))<1)
-l = merge(l,a,by="Names") # merge data keeping the correct order
-l = merge(l,b,by="Names")
+l = coef_table %>% group_by(Names)%>%dplyr::summarize(Beta_Md=round(median(exp(Beta)),4), Beta_MAD = round(mad(exp(Beta)),4), P_Md=round(median(P),4)) # estimate medians and MADs
+coef_table$bigger = ifelse(exp(coef_table$Beta)>1,1,0)
+bigger = coef_table%>%group_by(Names)%>%summarize("OR>1" = round(sum(bigger)/length(bigger),4))
+l = merge(l,bigger,by="Names") # merge data keeping the correct order
 l$Names = gsub("Age_BL_OFAMS", "Age", l$Names)
 l$Names = gsub("baselineV", "Lesion volume", l$Names)
 l$Names = gsub("baselineC", "Lesion count", l$Names)
@@ -161,7 +159,7 @@ l$group = c("General", "Patient-reported outcome measures","General","Brain mark
             "Omics", "Brain markers", "Brain markers",
             "Patient-reported outcome measures", "Omics",
             "Intervention","Clinical markers","Patient-reported outcome measures",
-            "Clinical markers","Patient-reported outcome measures","Patient-reported outcome measures",
+            "Clinical markers","Patient-reported outcome measures",
             "General","General","Patient-reported outcome measures",
             "Patient-reported outcome measures", "Omics",
             "Omics", "Omics")
@@ -185,7 +183,7 @@ l = mktable(c1)
 write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_high_R2.csv")
 
 # Consider only well-powered and high R2 models ####
-c1 = c1 %>% dplyr::filter(McFaddenR2>.2)
+c1 = c1 %>% dplyr::filter(Power>.8)
 cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # WORSE correspondence between R2 and power
 l = mktable(c1)
 write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_well_powered_and_high_R2.csv")
