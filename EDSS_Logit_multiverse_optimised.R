@@ -4,6 +4,7 @@
 library(dplyr)
 library(pscl)
 library(parallel)
+library(bbmle)
 #
 # Load data
 data <- read.csv("/Users/max/Documents/Local/MS/results/interrim_data.csv")
@@ -42,7 +43,8 @@ results <- mclapply(all_formulas, function(formula) {
       Names = names(model$coefficients),
       Beta = model$coefficients,
       SE = summary(model)$coefficients[, 2],
-      P = summary(model)$coefficients[, 4]
+      P = summary(model)$coefficients[, 4],
+      Formula = call.to.char(formula) #(as.character(model$call)[2])
     )
     
     # Return results

@@ -18,9 +18,9 @@ library(ggforce)
 model_info = read.csv("/Users/max/Documents/Local/MS/results/EDSS_model_info_optimised.csv")
 model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "FLG")
 pwr = read.csv("/Users/max/Documents/Local/MS/results/power.csv")
-model_info$Power = pwr$x
-#write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
-rm(pwr)
+pwr$Formula = gsub("FLG ~ ","",pwr$Formula)
+model_info = merge(model_info,pwr,by="Formula")
+write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
 # parameter info
 coef_table = read.csv("/Users/max/Documents/Local/MS/results/EDSS_stratification_optimised.csv")
 #coef_table = read.csv("/Users/max/Documents/Local/MS/results/model_coefficients.csv")
@@ -33,17 +33,27 @@ paste("Median McFadden pseudo R2 = ",round(median(model_info$McFaddenR2),2),"±"
 # Second, we can remove mis-specified models for the same display
 paste("Now, we look only at well-powered models.")
 #
-# Duplicate rows and extract predictor names
-model_info$Formula = as.character(c(model_info$Formula))
-# Ensure Formula column is character type and then split by space
-model_info <- model_info %>%
-  mutate(Formula = as.character(Formula)) %>%  # Ensure Formula is treated as character
-  tidyr::separate_rows(Formula, sep = " ") %>%        # Split Formula by space
-  rename(Names = Formula)                  # Rename Formula to Predictors
-# View the result
-model_info = model_info %>% filter(Names != "+")
+# Standardize formula column
 coef_table = coef_table %>% filter(Names != "(Intercept)")
-coef_table = cbind(model_info, coef_table %>% dplyr::select(-Names))
+coef_table$Formula = gsub('[^[:alnum:] ]', '', coef_table$Formula)
+coef_table$Formula = gsub('FLGc ', '',coef_table$Formula)
+coef_table$Formula = gsub('  ', ' ',coef_table$Formula)
+coef_table$Formula = gsub(' ', ' + ',coef_table$Formula)
+model_info$Formula = gsub('[^[:alnum:] ]', '', model_info$Formula)
+model_info$Formula = gsub('  ', ' + ',model_info$Formula)
+coef_table = full_join(coef_table,model_info,by="Formula")
+# # Duplicate rows and extract predictor names
+# model_info$Formula = as.character(c(model_info$Formula))
+# # Ensure Formula column is character type and then split by space
+# model_info <- model_info %>%
+#   mutate(Formula = as.character(Formula)) %>%  # Ensure Formula is treated as character
+#   tidyr::separate_rows(Formula, sep = " ") %>%        # Split Formula by space
+#   rename(Names = Formula)                  # Rename Formula to Predictors
+# # View the result
+# model_info = model_info %>% filter(Names != "+")
+# 
+# 
+# coef_table = cbind(model_info, coef_table %>% dplyr::select(-Names))
 rm(model_info)
 #
 #
@@ -88,12 +98,13 @@ l$Names = gsub("PASAT","Paced Auditory Serial Addition Test",l$Names)
 l$Names = gsub("Omega3_suppl","Omega 3 supplement received",l$Names)
 l=l[order(l$Names),] # order by name
 l = l%>%filter(Names != "(Intercept)")
+l$Names
 l$group = c("General", "Patient-reported outcome measures","General","Brain markers",
   "Omics", "Clinical markers", "Patient-reported outcome measures",
   "Omics", "Brain markers", "Brain markers",
   "Patient-reported outcome measures", "Omics",
   "Intervention","Clinical markers","Patient-reported outcome measures",
-  "Clinical markers","Patient-reported outcome measures",
+  "Clinical markers",
   "General","General","Patient-reported outcome measures",
   "Patient-reported outcome measures", "Omics",
   "Omics", "Omics")
@@ -159,7 +170,7 @@ l$group = c("General", "Patient-reported outcome measures","General","Brain mark
             "Omics", "Brain markers", "Brain markers",
             "Patient-reported outcome measures", "Omics",
             "Intervention","Clinical markers","Patient-reported outcome measures",
-            "Clinical markers","Patient-reported outcome measures",
+            "Clinical markers",
             "General","General","Patient-reported outcome measures",
             "Patient-reported outcome measures", "Omics",
             "Omics", "Omics")
@@ -169,6 +180,7 @@ l = mktable(coef_table)
 write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse.csv")
 #
 # Consider only well-powered models ####
+coef_table$Power = coef_table$pwr
 cor(coef_table$Power,coef_table$McFaddenR2,use = "pairwise.complete.obs") # just for my own interest: R2 and power correlation
 # note, there is no correspondence when considering low-power outcomes
 c1 = coef_table %>% dplyr::filter(Power >= 0.8) # filter for power ≥ 80%
