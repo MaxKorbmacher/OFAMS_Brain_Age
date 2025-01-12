@@ -1,5 +1,5 @@
-# OFAMS longitudinal analysis of brain age
-Analyses on the longitudinal OFAMS (ω-3 Fatty Acid Treatment in Multiple Sclerosis (MS)) MRI data using Brain Age.
+# Analysis of multimodal MS clinical trial data: the OFAMS longitudinal study
+Analyses on the longitudinal OFAMS (ω-3 Fatty Acid Treatment in Multiple Sclerosis (MS)) entails MRI data using Brain Age, multiomics, clinical and behavioural data.
 
 We start with explaining the _cortical_ brainage model and how to apply it to your own data.
 
