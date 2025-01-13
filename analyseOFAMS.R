@@ -34,6 +34,7 @@ lesion_count = read.csv("/Users/max/Documents/Local/MS/data/lesion_count.csv")
 lesion_vol = read.csv("/Users/max/Documents/Local/MS/data/lesion_vol.csv")
 blood = read.csv("/Users/max/Documents/Local/MS/data/Copy of Paired_serum-MRI.csv")
 background = read_excel("/Users/max/Documents/Local/MS/demographics/Statistikk-filer/Bakgrunnsdata-OFAMS.xls")
+idlist = read.csv(paste(savepath,"idlist.csv",sep=""))
 #
 #
 #
@@ -165,6 +166,15 @@ translist2 = data %>% dplyr::select(contains("spm3")) %>% names()
 for(i in 1:length(translist2)){
   data[grep(paste("^",translist2[i],"$",sep=""), colnames(data))] = c(as.integer(trans2(unlist(data[grep(paste("^",translist2[1],"$",sep=""), colnames(data))]))))
 }
+trans2 = function(spm){
+  a = ifelse(spm == 1,0,spm)
+  a = ifelse(a == 2,100,a)
+  return(a)
+}
+translist2 = data %>% dplyr::select(contains("spm4"),contains("spm5")) %>% names()
+for(i in 1:length(translist2)){
+  data[grep(paste("^",translist2[i],"$",sep=""), colnames(data))] = c(as.integer(trans2(unlist(data[grep(paste("^",translist2[1],"$",sep=""), colnames(data))]))))
+}
 trans3 = function(spm){
   a = ifelse(spm == 1,100,spm)
   a = ifelse(a == 2,80,a)
@@ -174,7 +184,7 @@ trans3 = function(spm){
   a = ifelse(a == 6,0,a)
   return(a)
 }
-translist3 = c("spm4b", "spm4d","spm9d", "spm9e", "spm9h")
+translist3 = c("spm7", "spm9a","spm9d", "spm9e", "spm9h")
 for(i in 1:length(translist3)){
   data[grep(paste("^",translist3[i],"$",sep=""), colnames(data))] = c(as.integer(trans3(unlist(data[grep(paste("^",translist3[1],"$",sep=""), colnames(data))]))))
 }
@@ -203,24 +213,24 @@ translist3 = c("spm10","spm11a","spm11c")
 for(i in 1:length(translist3)){
   data[grep(paste("^",translist3[i],"$",sep=""), colnames(data))] = c(as.integer(trans5(unlist(data[grep(paste("^",translist3[1],"$",sep=""), colnames(data))]))))
 }
-trans2 = function(spm){ # role physical and role emotional
-  a = ifelse(spm == 0,100,spm)
-  a = ifelse(a == 1,0,a)
-  return(a)
-}
-translist2 = data %>% dplyr::select(contains("spm4"), contains("spm5")) %>% names()
-for(i in 1:length(translist2)){
-  data[grep(paste("^",translist2[i],"$",sep=""), colnames(data))] = c(as.integer(trans2(unlist(data[grep(paste("^",translist2[1],"$",sep=""), colnames(data))]))))
-}
+# trans2 = function(spm){ # role physical and role emotional
+#   a = ifelse(spm == 0,100,spm)
+#   a = ifelse(a == 1,0,a)
+#   return(a)
+# }
+# translist2 = data %>% dplyr::select(contains("spm4"), contains("spm5")) %>% names()
+# for(i in 1:length(translist2)){
+#   data[grep(paste("^",translist2[i],"$",sep=""), colnames(data))] = c(as.integer(trans2(unlist(data[grep(paste("^",translist2[1],"$",sep=""), colnames(data))]))))
+# }
 # note that the scale levels differ and absolute sum scores have to be used.
 data$PF = data%>%dplyr::select(contains("spm3")) %>% rowSums()/10 # Physical functioning (PF)
 data$RF = data%>%dplyr::select(contains("spm4")) %>% rowSums()/4 # Role-physical (RF)
-data$BP = data%>%dplyr::select(spm7,spm8) %>% rowSums()/2 # Bodily pain (BP)
-data$GH = data%>%dplyr::select(spm1,contains("spm11")) %>% rowSums()/4 # General health (GH)
-data$VT = data%>%dplyr::select(spm9a,spm9b,spm9c,spm9d) %>% rowSums()/5 # Vitality (VT)
-data$SF = data%>%dplyr::select(spm6,spm10) %>% rowSums()/2 # Social functioning (SF)
 data$RE = data%>%dplyr::select(contains("spm5")) %>% rowSums()/3 # Role-emotional (RE)
+data$VT = data%>%dplyr::select(spm9a,spm9e,spm9g,spm9i) %>% rowSums()/4 # Vitality (VT)
 data$MH = data%>%dplyr::select(spm9b, spm9c, spm9d, spm9f, spm3h) %>% rowSums()/5 # Mental health (MH)
+data$SF = data%>%dplyr::select(spm6,spm10) %>% rowSums()/2 # Social functioning (SF)
+data$BP = data%>%dplyr::select(spm7,spm8) %>% rowSums()/2 # Bodily pain (BP)
+data$GH = data%>%dplyr::select(spm1,contains("spm11")) %>% rowSums()/5 # General health (GH)
 #
 # correlation matrices of variables of interest
 visits = c("0","6","12","24") # at 120 months follow-up, there are no clinical measures taken.
@@ -244,44 +254,48 @@ data %>% group_by(session) %>% summarize(N=length(na.omit((BAG))))
 print("We combat these problems in the representation of initial descriptives by excluding duplicates and low-N sessions.")
 df2 = filter(df,session == 0 | session == 6 | session == 24 |session == 120)
 print("All time points.")
-df$session
-ggplot(df, aes(session, BAG_c, group = eid, color = ""))+ #geom_point() + 
-  geom_line() + scale_colour_manual(values = c("brown")) +
-  theme_classic() + theme(legend.position = "none")
- print("Only time points with sufficient data.")
-ggplot(df2, aes(session, BAG_c, group = eid, color = ""))+ #geom_point() + 
-   geom_line() + scale_colour_manual(values = c("brown")) +
-   theme_classic() + theme(legend.position = "none")
-print("All time points.")
-ggplot(data= df, aes(x = session, y = BAG_c)) + 
-  geom_point(size = 2, alpha= 1, color = "gray85") + #,  aes(color = eid) colour points by group
-  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
-  stat_smooth(aes(group = 1),color="blue",fill = "red")+ #method = "lm"
-  ylab("Brain Age Gap") + xlab("Session") +
-  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
-  theme_bw()
-print("Only time points with sufficient data.")
 
-BAG_descriptive = ggplot(data= df2, aes(x = session, y = BAG_c)) + 
+
+# ggplot(df, aes(session, BAG_c, group = eid, color = ""))+ #geom_point() + 
+#   geom_line() + scale_colour_manual(values = c("brown")) +
+#   theme_classic() + theme(legend.position = "none")
+# print("Only time points with sufficient data.")
+# ggplot(df2, aes(session, BAG_c, group = eid, color = ""))+ #geom_point() + 
+#    geom_line() + scale_colour_manual(values = c("brown")) +
+#    theme_classic() + theme(legend.position = "none")
+# print("All time points.")
+# ggplot(data= df, aes(x = session, y = BAG_c)) + 
+#   geom_point(size = 2, alpha= 1, color = "gray85") + #,  aes(color = eid) colour points by group
+#   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+#   stat_smooth(aes(group = 1),color="blue",fill = "red")+ #method = "lm"
+#   ylab("Brain Age Gap") + xlab("Session") +
+#   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+#   theme_bw()
+# print("Only time points with sufficient data.")
+levels(df2$session) = c(0,1,2,3,4,5,6,7,8,9,12,24,144,18)
+BAG_descriptive = ggplot(data= df2[df2$eid %in% idlist$eid,], aes(x = session, y = BAG_c)) + 
   #scale_shape_manual(values=1:nlevels(factor(df2$eid))) +
   geom_point(size = 1.5, alpha= 1, color = "gray85") + #,  aes(color = eid) colour points by group # shape by eid aes(shape=factor(eid)),
   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
   stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
-  ylab("Brain Age Gap (years)") + xlab("Session (months)") +
+  ylab("Corrected BAG (years)") + xlab("Session (months)") +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
 ggsave(paste(savepath,"BAG_descriptive.pdf",sep=""),BAG_descriptive)
-df%>%group_by(session)%>%summarize(M=mean(na.omit(edss)))
+#df%>%group_by(session)%>%summarize(M=mean(na.omit(edss)))
 df3 = filter(df,session == 0 | session == 6 | session == 12 |session == 18 |session == 24)
 level_order = c(0,6,12,18,24)
-# EDSS_descriptive = ggplot(data= df3, aes(x = factor(session,level=level_order), y = edss)) + 
-#   geom_point(size = 1.5, alpha= 1, color = "gray85") +
-#   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
-#   stat_smooth(aes(group = 1),color="red",fill = "red", method = "lm")+ #
-#   ylab("EDSS") + xlab("Session (months)") +
-#   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
-#   theme_bw()
-# #setwd(paste(savepath,sep=""))
+edss.m = melt(edss,id.vars = "Patnr")
+levels(edss.m$variable) = c(0,6,12,18,24)
+names(edss.m) = c("eid","session","edss")
+EDSS_descriptive0 = ggplot(data= edss.m[edss.m$eid %in% idlist$eid,], aes(x = factor(session,level=level_order), y = edss)) +
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="green",fill = "green", method = "lm")+ #
+  ylab("EDSS") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+#setwd(paste(savepath,sep=""))
 df4 = filter(df,session == 0 | session == 6 | session == 12 |session == 24)
 PF_descriptive = ggplot(data= df4, aes(x = session, y = PF)) + 
   geom_point(size = 1.5, alpha= 1, color = "gray85") +
@@ -343,12 +357,6 @@ MH_descriptive = ggplot(data= df4, aes(x = session, y = MH)) +
   theme_bw()
 Mental_Health = ggarrange(VT_descriptive,SF_descriptive,RE_descriptive,MH_descriptive)
 ggsave(paste(savepath,"Mental_Health.pdf",sep=""),Mental_Health)
-#
-# check atrophy pattern by comparing the first (baseline) to final (10-years) timepoints
-# tf0 = anat %>% filter(session == "0") %>% unique() %>% # select the right timepoints & unique data (no duplicates)
-#   dplyr::select(-eid, -age, -brainage, -corrected_brainage, -X, -session)
-# tf120 = anat %>% filter(session == "120") %>% unique() %>% # select the right timepoints & unique data (no duplicates)
-#   dplyr::select(-eid, -age, -brainage, -corrected_brainage, -X, -session)
 #
 #
 #
@@ -438,6 +446,7 @@ edss.0$edss = ifelse(is.na(edss.0$edss.x)==T,edss.0$edss.y,edss.0$edss.x)
 #
 #
 idlist = demo10%>%filter(Inclusion==1) %>% dplyr::select(eid)
+#write.csv(idlist, paste(savepath,"idlist.csv",sep=""))
 edss_df = edss.0[edss.0$eid %in% idlist$eid,]
 # edss_df=edss_df[order(edss_df$eid,as.numeri(edss_df$ession), edss_df$age),]
 # df$age<-na.locf(df$age)
@@ -494,6 +503,9 @@ EDSS_descriptive = ggarrange(e1,e2)
 #   theme_bw()
 ggsave(paste(savepath,"EDSS_descriptive.pdf",sep=""),EDSS_descriptive, device = cairo_pdf,width = 9.5, height = 4)
 #
+# check differences in EDSS FLG vs FSIG
+mml = lmer(edss ~ FLG*age + sex + (1|eid),edss_df)
+summary(mml)
 #
 #
 # check whether the FLG edss cases can be counted as confirmed disability progression
@@ -643,59 +655,98 @@ prom = prom %>% dplyr::select(eid,FLG,age,sex,edss,PASAT,geno,relapses_12mnths_b
 prom=full_join((df %>% filter(session == 0) %>% dplyr::select(eid,BAG_c)),prom,by=c("eid"))
 prom = (unique(prom))
 prom = prom[prom$eid %in% unique(edss_df$eid),]
-write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
 #
-# Paced auditory serial addition test (PASAT) plotting ####
-# check the numbers for PASAT decline below a considerably and meaningfully low threshold
 pasat1 = pasat1[pasat1$eid %in% prom$eid,]
-
-levels(pasat1$session)
-summary(lm(PASAT~age+sex,data = pasat1%>%filter(session==0)))
+# Paced auditory serial addition test (PASAT) plotting ####
+PASAT_descriptive = ggplot(data= pasat1, aes(x = session, y = PASAT)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="green",fill = "green")+ #method = "lm"
+  ylab("PASAT") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+# check the numbers for PASAT decline below a considerably and meaningfully low threshold
+# explore PASAT
+summary(lm(PASAT~age+sex,data = pasat1%>%filter(session==0))) # summary stats for pasat at the 
 summary(lm(PASAT~age+sex,data = pasat1%>%filter(session==24)))
-summary(lm(PASAT~age+sex,data = pasat1%>%filter(session==144)))
-
+summary(lm(PASAT~age+sex,data = pasat1%>%filter(session==144))) # only an age effect on PASAT in the 10-year follow-up
 hist((pasat1%>%filter(session==0))$PASAT,breaks = 100)
 hist((pasat1%>%filter(session==24))$PASAT,breaks = 100)
 hist((pasat1%>%filter(session==144))$PASAT,breaks = 100)
-pasat_ids=(pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<=40 | session ==24 & PASAT<=40| session ==18 & PASAT<=40| session ==12 & PASAT<=40| session ==6 & PASAT<=40))$eid,])$eid%>%unique() %>% unlist()
-pasat_ids%>% length
+#
+#
+# define PASAT decline group
+mml = lmer(PASAT ~ age + sex + (1|eid),pasat1)
+#pasat1$preds = predict(mml,pasat1) # establish age and sex corrected scores
+a =  pasat1 %>% filter(session == 0) # make single time point dfs
+b = pasat1 %>% filter(session == 24)
+c = pasat1 %>% filter(session == 144)
+a = a[order(a$eid),]
+b = b[order(b$eid),]
+c = c[order(c$eid),]
+#a$CDG = ifelse(b$preds>c$preds & a$preds>c$preds,1,0) + ifelse(is.na(c$pres) == T & a$preds>b$preds,1,0) # make sure cognition declines
+a$CDG = ifelse(is.na(ifelse(c$PASAT-a$PASAT <= -15,1,0)),0,ifelse(c$PASAT-a$PASAT <= -15,1,0)) + 
+  ifelse(b$PASAT<40 & is.na(c$PASAT), 1,0) +
+  ifelse(is.na(ifelse(c$PASAT-b$PASAT <= -15,1,0)),0,ifelse(c$PASAT-b$PASAT <= -15,1,0))
+#a$CDG = ifelse(c$PASAT<40 | b$PASAT<40, 1, 0) + ifelse(b$PASAT<40 & is.na(c$PASAT), 1,0)
+a$improve = ifelse(b$PASAT<c$PASAT,-1,0) + ifelse(b$PASAT<40 & is.na(c$PASAT), 1,0) # define PASAT < 40
+a$improve = ifelse(is.na(a$improve) == T,0,a$improve)
+a$CDG = a$CDG + a$improve # improvers
+a$CDG = ifelse(a$CDG<1,0,1)
+pasat_ids = a %>% filter(CDG > 0) %>% select(eid) %>% unlist %>% unique # extract eids
+# add to main df
+pasat1$CDG = pasat1$eid %in% pasat_ids
+#pasat_ids = pasat1 %>% filter(CDG == 1) %>% select(eid) %>% unlist %>% unique
+#pasat_ids=(pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<40))$eid,]) %>% select(eid) %>%unique() %>% unlist()
 #pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT>=4 | session ==24 & PASAT>=4| session ==18 & PASAT>=4| session ==12 & PASAT>=4| session ==6 & PASAT>4))$eid,]%>% dplyr::select(eid) %>% unique  %>% unlist() %>% c()
 #pasat1 %>% filter(session == 144 & PASAT<=40) %>% summarize(mean(PASAT)) -pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<=40))$eid,]%>% filter(session ==0) %>% summarize(mean(PASAT))
-pasat1$FSL = pasat1$eid %in% pasat_ids
 mml = lmer(PASAT ~ session + age + sex + (1|eid),pasat1[pasat1$eid %in% pasat_ids,])
 cofff=summary(mml)$coefficients[3] # get corrected coefficient / difference
-
-# get ids 
-pasat_ids=(pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<=30 | session ==24 & PASAT<=30| session ==18 & PASAT<=30| session ==12 & PASAT<=30| session ==6 & PASAT>4))$eid,])$eid%>%unique() %>% unlist() %>% length
-e1 = ggplot(data= pasat1, aes(x = factor(session,level=level_order), y = PASAT)) + 
-  geom_line(aes(group = eid), color = "grey50") + gghighlight(min(PASAT)<=30,use_direct_label = F) +
-  geom_point(size = 1.5, alpha= 1, color = "grey50") + 
-  stat_smooth(aes(group = 1),color="red",fill = "red", method = "lm")+ #
+e1 = pasat1 %>% ggplot(aes(x = (session), y = PASAT)) + 
+  geom_line(data = pasat1 %>% dplyr::filter(CDG == 0), aes(group = eid),color = "lightgrey") +
+  geom_point(data = pasat1 %>% dplyr::filter(CDG == 0), mapping = aes(x = (session), y = PASAT), size = 1.5, alpha= 1, color = "lightgrey") +
+  geom_line(data = pasat1 %>% dplyr::filter(CDG == 1), aes(group = eid),color = "grey46") + #gghighlight(use_group_by = T ,use_direct_label = F)
+  geom_point(data = pasat1 %>% dplyr::filter(CDG == 1), mapping = aes(x = (session), y = PASAT), size = 1.5, alpha= 1, color = "grey46") + 
+  stat_smooth(data = pasat1 %>% dplyr::filter(CDG == 1), aes(group = 1),color="red",fill = "red", method = "lm")+ #
   ylab("PASAT") + xlab("Session (months)") +
-  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.8,color="blue")+ # geom = "pointrange"
-  theme_bw() + annotate("text",x=2,y=65,label= paste("Adjusted 10-year difference=",round(cofff,2),"N =",pasat_ids),cex=4) + 
-  ggtitle("Reached PASAT≤40")
-mml = lmer(PASAT ~ session + age + sex + (1|eid),pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT>40 | session ==24 & PASAT>40| session ==0 & PASAT>40))$eid,])
-cofff=summary(mml)$coefficients[3]
-
-pasat_ids=(pasat1[!pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<=30 | session ==24 & PASAT<=30| session ==18 & PASAT<=30| session ==12 & PASAT<=30| session ==6 & PASAT<=30))$eid,])$eid%>%unique() %>% unlist() %>% length
-
-e2 = ggplot(data= pasat1, aes(x = factor(session,level=level_order), y = PASAT)) + 
-  geom_line(aes(group = eid), color = "grey50") + gghighlight(min(PASAT)>30,use_direct_label = F) +
-  geom_point(size = 1.5, alpha= 1, color = "grey50") + 
-  stat_smooth(aes(group = 1),color="red",fill = "red", method = "lm")+ #
+  stat_summary(data = pasat1 %>% dplyr::filter(CDG == 1),aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.8,color="blue")+ # geom = "pointrange"
+  theme_bw() + annotate("text",x=2,y=62,label= paste("Adjusted 12-year difference =",round(cofff,2),"N =",length(pasat_ids)),cex=4) + 
+  ggtitle("Cognitive decline group")
+mml = lmer(PASAT ~ session + age + sex + (1|eid),pasat1[!pasat1$eid %in% pasat_ids,])
+cofff=summary(mml)$coefficients[3] # get corrected coefficient / difference
+e2 = pasat1 %>% ggplot(aes(x = (session), y = PASAT)) + 
+  geom_line(data = pasat1 %>% dplyr::filter(CDG == 1), aes(group = eid),color = "lightgrey") +
+  geom_point(data = pasat1 %>% dplyr::filter(CDG == 1), mapping = aes(x = (session), y = PASAT), size = 1.5, alpha= 1, color = "lightgrey") +
+  geom_line(data = pasat1 %>% dplyr::filter(CDG == 0), aes(group = eid),color = "grey46") + #gghighlight(use_group_by = T ,use_direct_label = F)
+  geom_point(data = pasat1 %>% dplyr::filter(CDG == 0), mapping = aes(x = (session), y = PASAT), size = 1.5, alpha= 1, color = "grey46") + 
+  stat_smooth(data = pasat1 %>% dplyr::filter(CDG == 0), aes(group = 0),color="red",fill = "red", method = "lm")+ #
   ylab("PASAT") + xlab("Session (months)") +
-  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.8,color="blue")+ # geom = "pointrange"
-  theme_bw() + annotate("text",x=2,y=65,label= paste("Adjusted 10-year difference=",round(cofff,2),"N =",pasat_ids),cex=4) + 
-  ggtitle("Reached PASAT≤40")
-ggarrange(e1,e2)
+  stat_summary(data = pasat1 %>% dplyr::filter(CDG == 0),aes(group = 0), fun.data = "mean_cl_boot", shape = 17, size = 0.8,color="blue")+ # geom = "pointrange"
+  theme_bw() + annotate("text",x=2,y=62,label= paste("Adjusted 12-year difference =",round(cofff,2),"N =",length(unique(pasat1[!pasat1$eid %in% pasat_ids,]$eid))),cex=4) + 
+  ggtitle("Cognitively stable or improving group")
+pasat_plot = ggarrange(e1,e2)
+ggsave(paste(savepath,"PASAT_descriptive.pdf",sep=""),pasat_plot, device = cairo_pdf,width = 9.5, height = 4)
+
 # check N in stratified group
-pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<=40 | session ==24 & PASAT<=40))$eid,] %>% group_by(session) %>% summarize(N = length(session))
-
+paste("cognitive decline group: N =",sum(unique(pasat1$eid) %in% pasat_ids))
 #
-pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<=40 | session ==24 & PASAT<=40))$eid,] %>% dplyr::select(eid) %>% unique
-
-
+# check how FLG and CLG overlap:
+paste("N =", sum(idlist %in% pasat_ids),"subjects are in both risk groups.")
+#
+#
+prom$CLG = as.numeric(prom$eid %in% pasat_ids)
+#
+# check whether the three subjects with attacks during the study time are in the CDG
+pasat1 %>% filter(eid %in% c(1503,809,813)) %>% filter(CDG ==T)
+#
+# check whether CLG has faster change in PASAT over time than CSIG
+summary(lmer(PASAT~age*CDG+sex+(1|eid),pasat1))
+#
+write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
+#
+#
+#
+#
 # Relationship between PASAT and EDSS ####
 # Interestingly, PASAT and EDSS appear unrelated in our sample.
 summary(lmer(PASAT~edss+age+sex+(1|eid),pasat1))
@@ -738,3 +789,103 @@ lc = full_join(lc,e,by=c("eid","variable"))
 lc$FLG = ifelse(lc$eid %in% unlist(idlist), 1, 0) # add flg for group comp
 # show the assiciation between edss and lesion count
 summary(lmer(value.y~value.x+(1|eid),lc)) # y = edss, x = count
+
+# Relationship between PASAT and lesions ####
+lc = melt(lesion_count,id.vars = "eid")
+levels(lc$variable) = c(0,1,2,3,4,5,6,7,8,9,12,24,120,15,18)
+names(lc) = c("eid","session","lesion_count")
+lc = full_join(lc,pasat1,by=c("eid","session"))
+
+summary(lmer(PASAT~lesion_count+(1|eid),lc)) # y = PASAT, x = count
+
+
+
+# Descriptive super figure ####
+#
+# LESIONS
+#
+lc = melt(lesion_count[lesion_count$eid %in% prom$eid,] %>% select(-m15,-m18),id.vars = "eid")
+lv = melt(lesion_vol[lesion_vol$eid %in% prom$eid,] %>% select(-m15,-m18),id.vars = "eid")
+levels(lc$variable) = levels(lv$variable) = c(0,1,2,3,4,5,6,7,8,9,12,24,144)
+Lesion_count_descriptive = ggplot(data= lc, aes(x = variable, y = value)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  ylab("Lesion Count") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+Lesion_volume_descriptive = ggplot(data= lv, aes(x = variable, y = value)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
+  ylab("Lesion Volume in ml") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+#
+# BLOOD
+#
+NfL_descriptive = ggplot(data= blood[blood$eid %in% prom$eid,], aes(x = session, y = NfL..pg.ml.)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="orange",fill = "orange")+ #method = "lm"
+  ylab("NfL in pg/ml") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+blood$CH3L.1..mg.ml..mean
+CH1_descriptive = ggplot(data= blood[blood$eid %in% prom$eid,], aes(x = session, y = CH3L.1..mg.ml..mean)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="orange",fill = "orange")+ #method = "lm"
+  ylab("CH3L-1 in mg/ml") + xlab("Session (months)") + ylim(0,100)+
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+# Vitas
+VD = demo10[demo10$eid %in% prom$eid,] %>% select(eid,Vit_D_0,Vit_D_12,Vit_D_24,Vitamin_D_OF10)
+#VDad = demo10[demo10$eid %in% prom$eid,] %>% select(eid,Vit_D_season_adjusted_0,Vit_D_season_adjusted_12,Vit_D_season_adjusted_24)
+VA = demo10[demo10$eid %in% prom$eid,] %>% select(eid,Vit_A_0,Vit_A_12,Vit_A_24,Vitamin_A_OF10)
+VE = demo10[demo10$eid %in% prom$eid,] %>% select(eid,Vit_E_0,Vit_E_12,Vit_E_24,Vitamin_E_OF10)
+VD = melt(VD,id.vars = "eid")
+VA = melt(VA,id.vars = "eid")
+VE = melt(VE,id.vars = "eid")
+VA$value = as.numeric(gsub(",",".",VA$value)) # remove Norwegian decimal separator "," & make it Eng "." convention
+VE$value = as.numeric(gsub(",",".",VE$value))
+levels(VA$variable) = levels(VD$variable) = levels(VE$variable) = c(0,12,24,144)
+
+VA_descriptive = ggplot(data= VA, aes(x = variable, y = value)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="orange",fill = "orange")+ #method = "lm"
+  ylab("Vitamin A umol/l") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+VE_descriptive = ggplot(data= VE, aes(x = variable, y = value)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="orange",fill = "orange")+ #method = "lm"
+  ylab("Vitamin E umol/l") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+VD_descriptive = ggplot(data= VD, aes(x = variable, y = value)) + 
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="orange",fill = "orange")+ #method = "lm"
+  ylab("Vitamin D nmol/l") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
+
+# Annotate and add up figures
+Mental_Health = annotate_figure(Mental_Health,top = text_grob("Self-Reported Mental Health",face = "bold"))
+Physical_Health = annotate_figure(Physical_Health,top = text_grob("Self-Reported Physical Health",face = "bold"))
+Clinical_Markers = ggarrange(EDSS_descriptive0, PASAT_descriptive)
+Clinical_Markers = annotate_figure(Clinical_Markers, top = text_grob("Clinical Markers",face = "bold"))
+Brain_Markers = ggarrange(Lesion_count_descriptive,Lesion_volume_descriptive,BAG_descriptive)
+Brain_Markers = annotate_figure(Brain_Markers, top = text_grob("Brain Markers",face = "bold"))
+Blood_Markers1 = ggarrange(NfL_descriptive,CH1_descriptive)
+Blood_Markers1 = annotate_figure(Blood_Markers1, top = text_grob("Blood Markers", face = "bold"))
+Vitamins = ggarrange(VA_descriptive,VD_descriptive,VE_descriptive)
+Vitamins = annotate_figure(Vitamins, top = text_grob("Vitamins", face = "bold"))
+
+descriptive_fig = ggarrange(Clinical_Markers,
+          Brain_Markers,Blood_Markers1,
+          Mental_Health, Physical_Health,Vitamins)
+ggsave(filename = paste(savepath,"big_descriptive.pdf",sep=""),descriptive_fig,width=12,height = 9)

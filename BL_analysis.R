@@ -14,12 +14,19 @@ library(rlist)
 library(WebPower)
 #
 data = data_unique(data = data, select = eid)
-
-# 1. POWER ####
+################ 1. FUNCTIONAL DECLINE ####
+# 1.1 POWER ####
 # power is calculated from another script (power.R or power_optimized.R for parallelisation)
 # we use some descriptives on power and model fit
-pwr = read.csv("/Users/max/Documents/Local/MS/results/model_info.csv")
+model_info = read.csv("/Users/max/Documents/Local/MS/results/EDSS_model_info_optimised.csv")
+model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "FLG")
+pwr = read.csv("/Users/max/Documents/Local/MS/results/power.csv")
+pwr$Formula = gsub("FLG ~ ","",pwr$Formula)
+pwr = merge(model_info,pwr,by="Formula")
+write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
+rm(model_info)
 # all models
+pwr$Power = pwr$pwr
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
 median(na.omit(pwr$Power))
@@ -28,7 +35,10 @@ median(na.omit(pwr$McFaddenR2))
 mad(na.omit(pwr$McFaddenR2))
 nrow(pwr) # number of all models ran
 sum(is.na(pwr$Power)) # models with convergence errors disallowing power calculation
+sum(ifelse(pwr$McFaddenR2 > 0.1, 1, 0))/nrow(pwr)
+#
 # high enough power models
+pw = pwr
 pwr = pwr %>% filter(Power >= .8)
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
@@ -36,7 +46,9 @@ median(na.omit(pwr$Power))
 mad(na.omit(pwr$Power))
 median(na.omit(pwr$McFaddenR2))
 mad(na.omit(pwr$McFaddenR2))
-nrow(pwr) # number of all models ran
+nrow(pwr) # number of  models ran
+nrow(pwr) / nrow(pw) # proportion of n
+#
 # high enough power and excellent model fit
 pwr = pwr %>% filter(McFaddenR2 >= .2)
 hist(pwr$Power)
@@ -46,11 +58,24 @@ mad(na.omit(pwr$Power))
 median(na.omit(pwr$McFaddenR2))
 mad(na.omit(pwr$McFaddenR2))
 nrow(pwr) # number of all models ran
+nrow(pwr) / nrow(pw) # proportion of n
+#
+# excellent model fit
+pwr = pw %>% filter(McFaddenR2 >= .2)
+hist(pwr$Power)
+hist(pwr$McFaddenR2)
+median(na.omit(pwr$Power))
+mad(na.omit(pwr$Power))
+median(na.omit(pwr$McFaddenR2))
+mad(na.omit(pwr$McFaddenR2))
+nrow(pwr) # number of  models ran
+nrow(pwr) / nrow(pw) # proportion of n
 rm(pwr)
 #
 #
 #
-# 2. DEMOGRAPHICS: BL differences between FLG and non-FLG patients ####
+#
+# 1.2 DEMOGRAPHICS: BL differences between FLG and non-FLG patients ####
 # Differences in continuous scores ####
 demotab=function(var){
   M_FLG = mean(unlist(na.omit(data%>%filter(FLG == 1))[var]))
@@ -67,15 +92,32 @@ demotab=function(var){
   return(data.frame(var,M_FLG,SD_FLG,M_FSG,SD_FSG,B,SE,CI_low, CI_high, t,p))
 }
 contvar = c("BAG_c","baselineC","baselineV","edss","PASAT",
-            "relapses_12mnths_before_baseline","age","BL_BMI",
+            "relapses_12mnths_before_baseline","BL_BMI",
             "CH3L.1..mg.ml..mean", "NfL..pg.ml.",
             "Vit_A_0", "Vit_D_0","Vit_E_0", "BP", "GH", "MH",
-            "PF", "RE", "RF", "SF", "VT")
+            "PF", "SF", "VT") # constants: "RE", "RF"
 demg = list()
 for (i in 1:length(contvar)){
   demg[[i]] = demotab(contvar[i])
 }
+
 demg = list.rbind(demg)
+# apply the whole spiel for age as well 
+demotab2=function(var){
+  M_FLG = mean(unlist(na.omit(data%>%filter(FLG == 1))[var]))
+  SD_FLG = sd(unlist(na.omit(data%>%filter(FLG == 1))[var]))
+  M_FSG = mean(unlist(na.omit(data%>%filter(FLG == 0))[var]))
+  SD_FSG = sd(unlist(na.omit(data%>%filter(FLG == 0))[var]))
+  FLG.imp = lm(formula(paste(var,"~ FLG + sex")), data)
+  B = summary(FLG.imp)$coefficients[2]
+  SE = summary(FLG.imp)$coefficients[2,2]
+  CI_low = B-1.96*SE
+  CI_high = B+1.96*SE
+  t = summary(FLG.imp)$coefficients[2,3]
+  p = summary(FLG.imp)$coefficients[2,4]
+  return(data.frame(var,M_FLG,SD_FLG,M_FSG,SD_FSG,B,SE,CI_low, CI_high, t,p))
+}
+demg = rbind(demotab2("age"),demg)
 demg[2:(ncol(demg)-1)] = round(demg[2:(ncol(demg)-1)], 2)
 demg$p = round(demg$p,4)
 demg$FSG = paste(demg$M_FSG," (",demg$SD_FSG,")",sep="")
@@ -114,4 +156,148 @@ names(res) = c("FLG & Group membership = yes","FLG & Group membership = no",
                "FSG & Group membership = yes","FSG & Group membership = no",
                "OR","p")
 write.csv(x = res, paste(datapath,"descriptive_binary.csv",sep=""))
+#
+#
+################ 2. COGNITIVE DECLINE ####
+# 2.1 POWER ####
+# power is calculated from another script (power.R or power_optimized.R for parallelisation)
+# we use some descriptives on power and model fit
+model_info = read.csv("/Users/max/Documents/Local/MS/results/PASAT_model_info_optimised.csv")
+model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "CLG")
+pwr = read.csv("/Users/max/Documents/Local/MS/results/CLG_power.csv")
+pwr$Formula = gsub("CLG ~ ","",pwr$Formula)
+pwr = merge(model_info,pwr,by="Formula")
+#write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
+rm(model_info)
+# all models
+pwr$Power = pwr$pwr
+hist(pwr$Power)
+hist(pwr$McFaddenR2)
+median(na.omit(pwr$Power))
+mad(na.omit(pwr$Power))
+median(na.omit(pwr$McFaddenR2))
+mad(na.omit(pwr$McFaddenR2))
+nrow(pwr) # number of all models ran
+sum(is.na(pwr$Power)) # models with convergence errors disallowing power calculation
+sum(ifelse(pwr$McFaddenR2 > 0.1, 1, 0))/nrow(pwr)
+#
+# high enough power models
+pw = pwr
+pwr = pwr %>% filter(Power >= .8)
+hist(pwr$Power)
+hist(pwr$McFaddenR2)
+median(na.omit(pwr$Power))
+mad(na.omit(pwr$Power))
+median(na.omit(pwr$McFaddenR2))
+mad(na.omit(pwr$McFaddenR2))
+nrow(pwr) # number of  models ran
+nrow(pwr) / nrow(pw) # proportion of n
+#
+# high enough power and excellent model fit
+pwr = pwr %>% filter(McFaddenR2 >= .2)
+hist(pwr$Power)
+hist(pwr$McFaddenR2)
+median(na.omit(pwr$Power))
+mad(na.omit(pwr$Power))
+median(na.omit(pwr$McFaddenR2))
+mad(na.omit(pwr$McFaddenR2))
+nrow(pwr) # number of all models ran
+nrow(pwr) / nrow(pw) # proportion of n
+#
+# excellent model fit
+pwr = pw %>% filter(McFaddenR2 >= .2)
+hist(pwr$Power)
+hist(pwr$McFaddenR2)
+median(na.omit(pwr$Power))
+mad(na.omit(pwr$Power))
+median(na.omit(pwr$McFaddenR2))
+mad(na.omit(pwr$McFaddenR2))
+nrow(pwr) # number of  models ran
+nrow(pwr) / nrow(pw) # proportion of n
+rm(pwr)
+#
+#
+#
+#
+# 2.2 DEMOGRAPHICS: BL differences between CLG and non-CLG patients ####
+# Differences in continuous scores ####
+demotab=function(var){
+  M_CLG = mean(unlist(na.omit(data%>%filter(CLG == 1))[var]))
+  SD_CLG = sd(unlist(na.omit(data%>%filter(CLG == 1))[var]))
+  M_CSIG = mean(unlist(na.omit(data%>%filter(CLG == 0))[var]))
+  SD_CSIG = sd(unlist(na.omit(data%>%filter(CLG == 0))[var]))
+  CLG.imp = lm(formula(paste(var,"~ CLG + sex + age")), data)
+  B = summary(CLG.imp)$coefficients[2]
+  SE = summary(CLG.imp)$coefficients[2,2]
+  CI_low = B-1.96*SE
+  CI_high = B+1.96*SE
+  t = summary(CLG.imp)$coefficients[2,3]
+  p = summary(CLG.imp)$coefficients[2,4]
+  return(data.frame(var,M_CLG,SD_CLG,M_CSIG,SD_CSIG,B,SE,CI_low, CI_high, t,p))
+}
+contvar = c("BAG_c","baselineC","baselineV","edss","PASAT",
+            "relapses_12mnths_before_baseline","BL_BMI",
+            "CH3L.1..mg.ml..mean", "NfL..pg.ml.",
+            "Vit_A_0", "Vit_D_0","Vit_E_0", "BP", "GH", "MH",
+            "PF", "SF", "VT") # constants: "RE", "RF"
+demg = list()
+for (i in 1:length(contvar)){
+  demg[[i]] = demotab(contvar[i])
+}
+demg = list.rbind(demg)
+# apply the whole spiel for age as well 
+demotab2=function(var){
+  M_CLG = mean(unlist(na.omit(data%>%filter(CLG == 1))[var]))
+  SD_CLG = sd(unlist(na.omit(data%>%filter(CLG == 1))[var]))
+  M_CSIG = mean(unlist(na.omit(data%>%filter(CLG == 0))[var]))
+  SD_CSIG = sd(unlist(na.omit(data%>%filter(CLG == 0))[var]))
+  CLG.imp = lm(formula(paste(var,"~ CLG + sex")), data)
+  B = summary(CLG.imp)$coefficients[2]
+  SE = summary(CLG.imp)$coefficients[2,2]
+  CI_low = B-1.96*SE
+  CI_high = B+1.96*SE
+  t = summary(CLG.imp)$coefficients[2,3]
+  p = summary(CLG.imp)$coefficients[2,4]
+  return(data.frame(var,M_CLG,SD_CLG,M_CSIG,SD_CSIG,B,SE,CI_low, CI_high, t,p))
+}
+demg = rbind(demotab2("age"),demg)
+demg[2:(ncol(demg)-1)] = round(demg[2:(ncol(demg)-1)], 2)
+demg$p = round(demg$p,4)
+demg$CSIG = paste(demg$M_CSIG," (",demg$SD_CSIG,")",sep="")
+demg$CLG = paste(demg$M_CLG," (",demg$SD_CLG,")",sep="")
+demg$Difference = paste(demg$B," (",demg$SE,")",sep="")
+demg = demg %>% dplyr::select(CLG,CSIG,Difference,CI_low,CI_high,t,p)
+write.csv(x = demg, paste(datapath,"PASAT_descriptive_continuous.csv",sep=""))
+#
+#
+#
+# Differences in frequencies ####
+# CLG 1 = CLG
+# sex: 1=female, 0=male
+binaries = c("sex", "smoking_OFAMS","Omega3_suppl", "geno")
+res=list()
+for (i in 1:length(binaries)){
+  # how the sausage is made, but obsolete for OR, CI, p:
+  a = table(data.frame(data["CLG"],data[paste(binaries[i])]))[4] # both 1
+  b = table(data.frame(data["CLG"],data[paste(binaries[i])]))[1] # both 0
+  c = table(data.frame(data["CLG"],data[paste(binaries[i])]))[3] # only CLG 1
+  d = table(data.frame(data["CLG"],data[paste(binaries[i])]))[2] # only var of interest 1
+  # OR = (a * b) / (c * d) # resulting odds ratio
+  # SE = sqrt(1/a + 1/b + 1/c + 1/d)
+  # CI_low = exp(log(OR)-1.96*SE)
+  # CI_high = exp(log(OR)+1.96*SE)
+  # data.frame(OR,SE,CI_low, CI_high)
+  res[[i]] = c(a,b,c,d,(fisher.test(table(data.frame(data["CLG"],data[paste(binaries[i])])))$estimate),
+               unlist(fisher.test(table(data.frame(data["CLG"],data[paste(binaries[i])])))[2]),
+               unlist(fisher.test(table(data.frame(data["CLG"],data[paste(binaries[i])])))[1]))
+}
+res = data.frame(list.rbind(res))
+rownames(res) = binaries
+res$OR=paste(round(res$odds.ratio,2)," [",round(res$conf.int1,2),",",round(res$conf.int2,2),"]",sep="")
+res = res %>% dplyr::select(V1,V2,V3,V4,OR,p.value)
+names(res) = c("CLG & Group membership = yes","CLG & Group membership = no", 
+               "CSIG & Group membership = yes","CSIG & Group membership = no",
+               "OR","p")
+write.csv(x = res, paste(datapath,"PASAT_descriptive_binary.csv",sep=""))
+#
 #
