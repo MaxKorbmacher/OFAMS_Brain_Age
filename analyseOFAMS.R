@@ -71,13 +71,13 @@ prom %>% dplyr::select(patno,contains("spm")) %>% is.na() %>% colSums() # check 
 #prom=prom %>% dplyr::select(patno,VISIT,contains("spm"))
 #prom=impute_shd(prom, .~1, backend="VIM")
 visits = levels(factor(prom$VISIT))
-prom = prom %>% rename(eid = patno, session = VISIT)
+prom = prom %>% dplyr::rename(eid = patno, session = VISIT)
 prom$session=factor(prom$session)
 levels(prom$session)=c(0,12,24,6)
 data=full_join(data,prom,by=c("eid","session"))
 #
 # Add sex and genotype to demo data.
-geno = geno %>% rename(eid=Patnr,geno=HLA_1501_1)
+geno = geno %>% dplyr::rename(eid=Patnr,geno=HLA_1501_1)
 sex = demo %>% dplyr::select(Patnr,Gender) %>% rename(eid=Patnr,sex=Gender)
 data = left_join(data,geno, by="eid")
 data = left_join(data,sex, by="eid")
@@ -425,11 +425,11 @@ demo10$eid=demo10$Patnr
 edss_df0 = demo10%>% dplyr::select(eid,Age_OFAMS10,edss_month_120,sex)
 edss_df0$session = "144"
 names(edss_df0) = c("eid", "age", "edss", "sex", "session")
-edss_df = df3 %>% dplyr::select(eid, age, edss, sex, session)
-edss_df = rbind(edss_df,edss_df0)
+edss_df = df3 %>% dplyr::select(eid, age, edss, session)
+# edss_df = rbind(edss_df,edss_df0)
 # IMPORTANT: FILTER EMPTY DATA!!
-edss_df = edss_df %>% filter(!eid == 403) %>% filter(!eid == 807) %>% filter(!eid == 1106)%>% filter(!eid == 1408)
-edss_df = edss_df[order(edss_df$eid,edss_df$session),]
+# edss_df = edss_df %>% filter(!eid == 403) %>% filter(!eid == 807) %>% filter(!eid == 1106)%>% filter(!eid == 1408)
+# edss_df = edss_df[order(edss_df$eid,edss_df$session),]
 #write.csv(edss_df,paste(savepath,"tmp_table.csv",sep=""))
 edss_df = read.csv(paste(savepath,"edss_age_table.csv",sep=""))
 #
@@ -455,6 +455,9 @@ edss_df = edss.0[edss.0$eid %in% idlist$eid,]
 edss_df$session = factor(edss_df$session)
 # to estimate the age and sex adjusted EDSS score, we use an LME
 ## these are the participant with an edss equal or bigger 4
+idlist=edss_df[edss_df$eid %in% (edss_df %>% filter(session ==144 & edss>=3 | session ==24 & edss>=3| session ==18 & edss>=3| session ==12 & edss>=3| session ==6 & edss>3))$eid,]%>% dplyr::select(eid) %>% unique  %>% unlist() %>% c()
+# further filtering
+#idlist %in% ifelse((edss_df%>%filter(session ==144))$edss < (edss_df%>%filter(session ==24))$edss,(edss_df %>% filter(session==0))$eid,0)
 idlist=edss_df[edss_df$eid %in% (edss_df %>% filter(session ==144 & edss>=4 | session ==24 & edss>=4| session ==18 & edss>=4| session ==12 & edss>=4| session ==6 & edss>4))$eid,]%>% dplyr::select(eid) %>% unique  %>% unlist() %>% c()
 #211 and 604 improve; 215 and 806 are stable
 idlist = idlist[!idlist %in% c(211,215,604,806)]
@@ -535,6 +538,12 @@ edss %>% filter(eid %in% c(1503,809,813))
 #
 #
 #
+################ CHECK BASELINE EDSS
+paste("EDSS: M=",round(mean(na.omit(edss$`0`)),2),"SD=",round(sd(na.omit(edss$`0`)),2))
+############### CHECK DISEASE AND SYMPOM DURATION AT BASELINE
+dem = (demo[!duplicated(demo$patno),] %>% filter(Patnr %in% edss$eid))
+paste("Disease duration: M=",round(mean(na.omit(dem$DISEASE_DURATION)),2),"SD=",round(sd(na.omit(dem$DISEASE_DURATION)),2))
+paste("Disease duration: M=",round(mean(na.omit(dem$SYMPTOM_DURATION)),2),"SD=",round(sd(na.omit(dem$SYMPTOM_DURATION)),2))
 #
 # Paced auditory serial addition test (PASAT) assessment ####
 t.test(demo10$PASAT_OFAMS10,demo10$BL_PASATcorrect,paired = T) # PASAT score decreases
@@ -745,6 +754,8 @@ summary(lmer(PASAT~age*CDG+sex+(1|eid),pasat1))
 write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
 #
 #
+################ CHECK BASELINE PASAT
+paste("PASAT: M=",round(mean(na.omit((pasat1 %>% filter(session ==0))$PASAT)),2),"SD=",round(sd(na.omit((pasat1 %>% filter(session ==0))$PASAT)),2))
 #
 #
 # Relationship between PASAT and EDSS ####
