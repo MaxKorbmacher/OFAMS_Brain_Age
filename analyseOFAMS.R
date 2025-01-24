@@ -390,6 +390,8 @@ df1$BAG_c_diff = (df2$BAG_c-df1$BAG_c)
 BAGdf = df1 %>% dplyr::select(eid, BAG_c, BAG_c_diff)
 #
 demo10$edss_baseline = as.numeric(gsub(",",".",demo10$edss_baseline))
+#median(demo10$edss_baseline,na.rm = T)
+#mad(demo10$edss_baseline,na.rm = T)
 demo10$edss_month_12 = as.numeric(gsub(",",".",demo10$edss_month_12))
 demo10$edss_month18 = as.numeric(gsub(",",".",demo10$edss_month18))
 demo10$edss_month_24 = as.numeric(gsub(",",".",demo10$edss_month_24))
@@ -892,7 +894,7 @@ Clinical_Markers = annotate_figure(Clinical_Markers, top = text_grob("Clinical M
 Brain_Markers = ggarrange(Lesion_count_descriptive,Lesion_volume_descriptive,BAG_descriptive)
 Brain_Markers = annotate_figure(Brain_Markers, top = text_grob("Brain Markers",face = "bold"))
 Blood_Markers1 = ggarrange(NfL_descriptive,CH1_descriptive)
-Blood_Markers1 = annotate_figure(Blood_Markers1, top = text_grob("Blood Markers", face = "bold"))
+Blood_Markers1 = annotate_figure(Blood_Markers1, top = text_grob("Serum Markers", face = "bold"))
 Vitamins = ggarrange(VA_descriptive,VD_descriptive,VE_descriptive)
 Vitamins = annotate_figure(Vitamins, top = text_grob("Vitamins", face = "bold"))
 
