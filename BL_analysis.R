@@ -123,7 +123,8 @@ demg$p = round(demg$p,4)
 demg$FSG = paste(demg$M_FSG," (",demg$SD_FSG,")",sep="")
 demg$FLG = paste(demg$M_FLG," (",demg$SD_FLG,")",sep="")
 demg$Difference = paste(demg$B," (",demg$SE,")",sep="")
-demg = demg %>% dplyr::select(FLG,FSG,Difference,CI_low,CI_high,t,p)
+demg$CI = paste(round(demg$CI_low,2), "; ",round(demg$CI_high,2),sep="")
+demg = demg %>% dplyr::select(FLG,FSG,Difference,CI,t,p)
 write.csv(x = demg, paste(datapath,"descriptive_continuous.csv",sep=""))
 #
 #
