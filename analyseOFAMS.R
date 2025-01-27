@@ -282,19 +282,13 @@ BAG_descriptive = ggplot(data= df2[df2$eid %in% idlist$eid,], aes(x = session, y
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
 ggsave(paste(savepath,"BAG_descriptive.pdf",sep=""),BAG_descriptive)
+ICC(reshape(df2[df2$eid %in% idlist$eid,]%>%dplyr::select(eid,session,BAG_c), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+
 #df%>%group_by(session)%>%summarize(M=mean(na.omit(edss)))
 df3 = filter(df,session == 0 | session == 6 | session == 12 |session == 18 |session == 24)
 level_order = c(0,6,12,18,24)
-edss.m = melt(edss,id.vars = "Patnr")
-levels(edss.m$variable) = c(0,6,12,18,24)
-names(edss.m) = c("eid","session","edss")
-EDSS_descriptive0 = ggplot(data= edss.m[edss.m$eid %in% idlist$eid,], aes(x = factor(session,level=level_order), y = edss)) +
-  geom_point(size = 1.5, alpha= 1, color = "gray85") +
-  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
-  stat_smooth(aes(group = 1),color="green",fill = "green", method = "lm")+ #
-  ylab("EDSS") + xlab("Session (months)") +
-  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
-  theme_bw()
 #setwd(paste(savepath,sep=""))
 df4 = filter(df,session == 0 | session == 6 | session == 12 |session == 24)
 PF_descriptive = ggplot(data= df4, aes(x = session, y = PF)) + 
@@ -327,11 +321,22 @@ GH_descriptive = ggplot(data= df4, aes(x = session, y = GH)) +
   theme_bw()
 Physical_Health = ggarrange(PF_descriptive,RF_descriptive,BP_descriptive,GH_descriptive)
 ggsave(paste(savepath,"Physical_Health.pdf",sep=""),Physical_Health)
+
+ICC(reshape(df4%>%dplyr::select(eid,session,PF), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+ICC(reshape(df4%>%dplyr::select(eid,session,BP), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+ICC(reshape(df4%>%dplyr::select(eid,session,GH), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+
 VT_descriptive = ggplot(data= df4, aes(x = session, y = VT)) + 
   geom_point(size = 1.5, alpha= 1, color = "gray85") +
   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
   stat_smooth(aes(group = 1),color="red",fill = "red")+ #method = "lm"
-  ylab("General health") + xlab("Session (months)") +
+  ylab("Vitality") + xlab("Session (months)") +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
 SF_descriptive = ggplot(data= df4, aes(x = session, y = SF)) + 
@@ -357,6 +362,16 @@ MH_descriptive = ggplot(data= df4, aes(x = session, y = MH)) +
   theme_bw()
 Mental_Health = ggarrange(VT_descriptive,SF_descriptive,RE_descriptive,MH_descriptive)
 ggsave(paste(savepath,"Mental_Health.pdf",sep=""),Mental_Health)
+
+ICC(reshape(df4%>%dplyr::select(eid,session,VT), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+ICC(reshape(df4%>%dplyr::select(eid,session,SF), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+ICC(reshape(df4%>%dplyr::select(eid,session,MH), 
+        idvar = "eid", timevar = "session", 
+        direction = "wide") %>% dplyr::select(-eid))
 #
 #
 #
@@ -498,6 +513,13 @@ e2 = edss_df %>% ggplot(aes(x = (session), y = edss)) +
   theme_bw() + annotate("text",x=3,y=8,label= paste("Adjusted 12-year difference =",round(cofff,2),"N =",ids),cex=4) + 
   ggtitle("Functionally stable and improving group")
 EDSS_descriptive = ggarrange(e1,e2)
+#
+# Prediction of the between-subject ageing effect 
+riskm=lmer(edss ~ sex + age*FLG+ (1|eid),edss_df)
+flg_plot=plot_model(riskm, type = "int")+
+  xlab("Age")+ylab("Expanded Disability Status Scale")+
+  ggtitle("Predicted functional loss")+theme_bw()+theme(legend.position="none")
+
 # col = ifelse(edss_df$edss>=4,"red","gray85")
 # EDSS_descriptive = ggplot(data= edss_df, aes(x = factor(session,level=level_order), y = edss)) + 
 #   geom_point(size = 1.5, alpha= 1, color = "gray85") +
@@ -506,8 +528,20 @@ EDSS_descriptive = ggarrange(e1,e2)
 #   ylab("EDSS") + xlab("Session (months)") +
 #   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
 #   theme_bw()
+
+EDSS_descriptive0 = ggplot(data= edss_df, aes(x = factor(session,level=level_order), y = edss)) +
+  geom_point(size = 1.5, alpha= 1, color = "gray85") +
+  geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
+  stat_smooth(aes(group = 1),color="green",fill = "green", method = "lm")+ #
+  ylab("EDSS") + xlab("Session (months)") +
+  stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
+  theme_bw()
 ggsave(paste(savepath,"EDSS_descriptive.pdf",sep=""),EDSS_descriptive, device = cairo_pdf,width = 9.5, height = 4)
 #
+ICC(reshape(edss_df%>%dplyr::select(eid,session,edss), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+
 # check differences in EDSS FLG vs FSIG
 mml = lmer(edss ~ FLG*age + sex + (1|eid),edss_df)
 summary(mml)
@@ -704,7 +738,7 @@ a$improve = ifelse(b$PASAT<c$PASAT,-1,0) + ifelse(b$PASAT<40 & is.na(c$PASAT), 1
 a$improve = ifelse(is.na(a$improve) == T,0,a$improve)
 a$CDG = a$CDG + a$improve # improvers
 a$CDG = ifelse(a$CDG<1,0,1)
-pasat_ids = a %>% filter(CDG > 0) %>% select(eid) %>% unlist %>% unique # extract eids
+pasat_ids = a %>% filter(CDG > 0) %>% dplyr::select(eid) %>% unlist %>% unique # extract eids
 # add to main df
 pasat1$CDG = pasat1$eid %in% pasat_ids
 #pasat_ids = pasat1 %>% filter(CDG == 1) %>% select(eid) %>% unlist %>% unique
@@ -737,6 +771,21 @@ e2 = pasat1 %>% ggplot(aes(x = (session), y = PASAT)) +
   ggtitle("Cognitively stable or improving group")
 pasat_plot = ggarrange(e1,e2)
 ggsave(paste(savepath,"PASAT_descriptive.pdf",sep=""),pasat_plot, device = cairo_pdf,width = 9.5, height = 4)
+ICC(reshape(pasat1%>%dplyr::select(eid,session,PASAT), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+# Prediction of the between-subject ageing effect 
+pasat1$CDG=factor(pasat1$CDG)
+riskm=lmer(PASAT ~ sex + age*CDG+ (1|eid),pasat1)
+cdg_plot=plot_model(riskm, type = "int")+
+  xlab("Age")+ylab("Paced Auditory Serial Addition Test")+
+  ggtitle("Predicted cognitive decline")+theme_bw()+theme(legend.position="none")
+#
+#
+# Marginal effect plot showcasing differential ageing trajectories
+pred_plots = ggarrange(flg_plot,cdg_plot)
+ggsave(paste(savepath,"Prediction_Plots.pdf",sep=""),pred_plots, device = cairo_pdf,width = 7, height = 4)
+ggsave(paste(savepath,"Figure1.png",sep=""),pred_plots,width = 7, height = 4)
 
 # check N in stratified group
 paste("cognitive decline group: N =",sum(unique(pasat1$eid) %in% pasat_ids))
@@ -834,6 +883,13 @@ Lesion_volume_descriptive = ggplot(data= lv, aes(x = variable, y = value)) +
   ylab("Lesion Volume in ml") + xlab("Session (months)") +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
+ICC(reshape(lc%>%dplyr::select(eid,variable,value), 
+            idvar = "eid", timevar = "variable", 
+            direction = "wide") %>% dplyr::select(-eid))
+ICC(reshape(lv%>%dplyr::select(eid,variable,value), 
+            idvar = "eid", timevar = "variable", 
+            direction = "wide") %>% dplyr::select(-eid))
+
 #
 # BLOOD
 #
@@ -844,7 +900,6 @@ NfL_descriptive = ggplot(data= blood[blood$eid %in% prom$eid,], aes(x = session,
   ylab("NfL in pg/ml") + xlab("Session (months)") +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
-blood$CH3L.1..mg.ml..mean
 CH1_descriptive = ggplot(data= blood[blood$eid %in% prom$eid,], aes(x = session, y = CH3L.1..mg.ml..mean)) + 
   geom_point(size = 1.5, alpha= 1, color = "gray85") +
   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
@@ -852,6 +907,15 @@ CH1_descriptive = ggplot(data= blood[blood$eid %in% prom$eid,], aes(x = session,
   ylab("CH3L-1 in mg/ml") + xlab("Session (months)") + ylim(0,100)+
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
+ICC(reshape(blood%>%dplyr::select(eid,session,NfL..pg.ml.), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))
+
+ICC((reshape(blood%>%dplyr::select(eid,session,CH3L.1..mg.ml..mean), 
+            idvar = "eid", timevar = "session", 
+            direction = "wide") %>% dplyr::select(-eid))[1:5])
+
+
 # Vitas
 VD = demo10[demo10$eid %in% prom$eid,] %>% select(eid,Vit_D_0,Vit_D_12,Vit_D_24,Vitamin_D_OF10)
 #VDad = demo10[demo10$eid %in% prom$eid,] %>% select(eid,Vit_D_season_adjusted_0,Vit_D_season_adjusted_12,Vit_D_season_adjusted_24)
@@ -885,7 +949,15 @@ VD_descriptive = ggplot(data= VD, aes(x = variable, y = value)) +
   ylab("Vitamin D nmol/l") + xlab("Session (months)") +
   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
   theme_bw()
-
+ICC(reshape(VA%>%dplyr::select(eid,variable,value), 
+            idvar = "eid", timevar = "variable", 
+            direction = "wide") %>% dplyr::select(-eid))
+ICC(reshape(VE%>%dplyr::select(eid,variable,value), 
+            idvar = "eid", timevar = "variable", 
+            direction = "wide") %>% dplyr::select(-eid))
+ICC(reshape(VD%>%dplyr::select(eid,variable,value), 
+            idvar = "eid", timevar = "variable", 
+            direction = "wide") %>% dplyr::select(-eid))
 # Annotate and add up figures
 Mental_Health = annotate_figure(Mental_Health,top = text_grob("Self-Reported Mental Health",face = "bold"))
 Physical_Health = annotate_figure(Physical_Health,top = text_grob("Self-Reported Physical Health",face = "bold"))
