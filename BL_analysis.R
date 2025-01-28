@@ -12,18 +12,59 @@ library(dplyr)
 library(datawizard)
 library(rlist)
 library(WebPower)
+library(naniar)
 #
 data = data_unique(data = data, select = eid)
+#
+# missingness
+missi = data
+names(missi) = gsub("Age_BL_OFAMS", "Age", names(missi))
+names(missi) = gsub("baselineV", "Lesion volume", names(missi))
+names(missi) = gsub("baselineC", "Lesion count", names(missi))
+names(missi) = gsub("TotalVol", "Brain volume", names(missi))
+names(missi) = gsub("TIV", "Intracranial volume", names(missi))
+names(missi) = gsub("geno", "HLA-DRB1 carrier", names(missi))
+names(missi) = gsub("CH3L.1..mg.ml..mean", "Chitinase-3 like-protein-1 mg/ml", names(missi))
+names(missi) = gsub("BL_BMI", "Body Mass Index", names(missi))
+names(missi) = gsub("edss_baseline", "EDSS", names(missi))
+names(missi) = gsub("Vit_A_0", "Vitamin A", names(missi))
+names(missi) = gsub("Vit_D_0", "Vitamin D", names(missi))
+names(missi) = gsub("Vit_E_0", "Vitamin ", names(missi))
+names(missi) = gsub("PF", "Physical functioning", names(missi))
+names(missi) = gsub("RF", "Role-physical", names(missi))
+names(missi) = gsub("BP", "Bodily pain", names(missi))
+names(missi) = gsub("GH", "General health", names(missi))
+names(missi) = gsub("VT", "Vitality", names(missi))
+names(missi) = gsub("SF", "Social functioning", names(missi))
+names(missi) = gsub("RE", "Role-emotional", names(missi))
+names(missi) = gsub("MH", "Mental health", names(missi))
+names(missi) = gsub("BAG_c", "Brain age gap", names(missi))
+names(missi) = gsub("NfL..pg.ml.", "Neurofilament light chain", names(missi))
+names(missi) = gsub("BAG_c", "Brain age gap", names(missi))
+names(missi) = gsub("relapses_12mnths_before_baseline", "Relapses at baseline", names(missi)) # 12 months prior
+names(missi) = gsub("smoking_OFAMS", "Smoking status", names(missi))
+names(missi) = gsub("sex", "Sex", names(missi))
+names(missi) = gsub("Treatment_OFAMS", "Omega-3 Intervention", names(missi))
+names(missi) = gsub("age","Age",names(missi))
+names(missi) = gsub("edss","Expanded Disability Status Scale (EDSS)",names(missi))
+names(missi) = gsub("PASAT","Paced Auditory Serial Addition Test (PASAT)",names(missi))
+names(missi) = gsub("Omega3_suppl","Omega 3 supplement received",names(missi))
+missi=missi[order(names(missi)),] # order by name
+missi = gg_miss_var(missi%>%select(-c(eid,X,CLG,FLG)))
+ggsave(paste(datapath,"missingness.pdf",sep=""),missi)
+rm(missi)
+#
+#
 ################ 1. FUNCTIONAL DECLINE ####
 # 1.1 POWER ####
 # power is calculated from another script (power.R or power_optimized.R for parallelisation)
 # we use some descriptives on power and model fit
-model_info = read.csv("/Users/max/Documents/Local/MS/results/EDSS_model_info_optimised.csv")
+model_info = read.csv(paste(datapath,"EDSS_model_info_optimised.csv",sep=""))
 model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "FLG")
-pwr = read.csv("/Users/max/Documents/Local/MS/results/power.csv")
+pwr = read.csv(paste(datapath,"power.csv",sep=""))
 pwr$Formula = gsub("FLG ~ ","",pwr$Formula)
 pwr = merge(model_info,pwr,by="Formula")
-write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
+write.csv(x = model_info, paste(datapath,"model_info.csv",sep=""))
 rm(model_info)
 # all models
 pwr$Power = pwr$pwr
@@ -127,6 +168,11 @@ demg$CI = paste(round(demg$CI_low,2), "; ",round(demg$CI_high,2),sep="")
 demg = demg %>% dplyr::select(FLG,FSG,Difference,CI,t,p)
 write.csv(x = demg, paste(datapath,"descriptive_continuous.csv",sep=""))
 #
+# check also median and mad for EDSS
+median(unlist(na.omit(data%>%filter(FLG == 1))["edss"]))
+mad(unlist(na.omit(data%>%filter(FLG == 1))["edss"]))
+median(unlist(na.omit(data%>%filter(FLG == 0))["edss"]))
+mad(unlist(na.omit(data%>%filter(FLG == 0))["edss"]))
 #
 #
 # Differences in frequencies ####
@@ -163,12 +209,11 @@ write.csv(x = res, paste(datapath,"descriptive_binary.csv",sep=""))
 # 2.1 POWER ####
 # power is calculated from another script (power.R or power_optimized.R for parallelisation)
 # we use some descriptives on power and model fit
-model_info = read.csv("/Users/max/Documents/Local/MS/results/PASAT_model_info_optimised.csv")
+model_info = read.csv(paste(datapath,"PASAT_model_info_optimised.csv",sep=""))
 model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "CLG")
-pwr = read.csv("/Users/max/Documents/Local/MS/results/CLG_power.csv")
+pwr = read.csv(paste(datapath,"CLG_power.csv",sep=""))
 pwr$Formula = gsub("CLG ~ ","",pwr$Formula)
 pwr = merge(model_info,pwr,by="Formula")
-#write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
 rm(model_info)
 # all models
 pwr$Power = pwr$pwr
@@ -269,6 +314,12 @@ demg$CLG = paste(demg$M_CLG," (",demg$SD_CLG,")",sep="")
 demg$Difference = paste(demg$B," (",demg$SE,")",sep="")
 demg = demg %>% dplyr::select(CLG,CSIG,Difference,CI_low,CI_high,t,p)
 write.csv(x = demg, paste(datapath,"PASAT_descriptive_continuous.csv",sep=""))
+#
+# finally, check median and mad for edss
+median(unlist(na.omit(data%>%filter(CLG == 1))["edss"]))
+mad(unlist(na.omit(data%>%filter(CLG == 1))["edss"]))
+median(unlist(na.omit(data%>%filter(CLG == 0))["edss"]))
+mad(unlist(na.omit(data%>%filter(CLG == 0))["edss"]))
 #
 #
 #
