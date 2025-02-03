@@ -22,7 +22,7 @@ T1 (TR 500-750 mm, TE 10-20 ms, matrix size 384x512, NEX 2, FOV 250 mm2, slice t
 Original report of the clinical trial: 
 Torkildsen, Ø., Wergeland, S., Bakke, S., Beiske, A. G., Bjerve, K. S., Hovdal, H., ... & Myhr, K. M. (2012). ω-3 fatty acid treatment in multiple sclerosis (OFAMS Study): a randomized, double-blind, placebo-controlled trial. Archives of neurology, 69(8), 1044-1051. https://doi.org/10.1001/archneurol.2012.283
 
-Finally, there is one previously published study looking at brain age in MS patients https://doi.org/10.3389/fneur.2019.00450
+Finally, there is one previously published study looking at longitudinal brain age in MS patients https://doi.org/10.3389/fneur.2019.00450
 Limitations here: Healthy controls had no follow-ups, explainability of the model, relatively small N in training set, no further validations in an external validation set.
 Advancements: brain age particularly sensitive to MS when estimated from subcortical regions and cerebellum.
 
