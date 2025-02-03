@@ -9,8 +9,8 @@ Then, more OFAMS data/study-specific details are being described.
 1. After the FreeSurfer recon-all call or similar, e.g. using FastSurfer, tabular information are available per subject. We use the averages of the parcels of the Desikan-Killiany atlas as specified in the FreeSurfer output per subject.
 2. Whether a brain age shall be predicted for a single subject or several, the obtained tables can be merged to a table per metric (e.g., thickness) using stats2table_bash.sh
 3. Now, the resulting tables need to be merged (again!) into a single table. There is a provided merge.py script in the repository that can be used for that purpose. You end up with tables which can be used as input to predict age / to obtain the desired brain age predictions. Simply add "age" as a variable and you will also obtain corrected brain age predictions. The data frame can contain additional variables which will not be used by the model. The output file will contain all input data + the brain age predictions.
-4. Download the model (sim_model.rda) from https://doi.org/10.17605/OSF.IO/3F4MD 
-5. Run 'Rscript 05_predict.R /path/to/your/data.csv' and you will obtain the predictions in the working directory. You can add additional arguments to change paths and the output file name.
+4. Download the model (sim_model.rda) from https://doi.org/10.17605/OSF.IO/AE5RX
+6. Run 'Rscript 05_predict.R /path/to/your/data.csv' and you will obtain the predictions in the working directory. You can add additional arguments to change paths and the output file name.
 
 
 ## OFAMS study background
@@ -112,5 +112,6 @@ Individual level variability (each feature can range from the minimum to the max
 
 ## Results
 The results will soon be presented in a pre-print and following scientific publication.
+Multiverse summary statistics can be found here: https://doi.org/10.17605/OSF.IO/AE5RX
 
 
