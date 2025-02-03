@@ -70,10 +70,9 @@ rm(model_info)
 pwr$Power = pwr$pwr
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
-median(na.omit(pwr$Power))
-mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of all models ran
 sum(is.na(pwr$Power)) # models with convergence errors disallowing power calculation
 sum(ifelse(pwr$McFaddenR2 > 0.1, 1, 0))/nrow(pwr)
@@ -83,10 +82,9 @@ pw = pwr
 pwr = pwr %>% filter(Power >= .8)
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
-median(na.omit(pwr$Power))
-mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of  models ran
 nrow(pwr) / nrow(pw) # proportion of n
 #
@@ -94,10 +92,9 @@ nrow(pwr) / nrow(pw) # proportion of n
 pwr = pwr %>% filter(McFaddenR2 >= .2)
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
-median(na.omit(pwr$Power))
-mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of all models ran
 nrow(pwr) / nrow(pw) # proportion of n
 #
@@ -105,10 +102,9 @@ nrow(pwr) / nrow(pw) # proportion of n
 pwr = pw %>% filter(McFaddenR2 >= .2)
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
-median(na.omit(pwr$Power))
-mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of  models ran
 nrow(pwr) / nrow(pw) # proportion of n
 rm(pwr)
@@ -221,8 +217,9 @@ hist(pwr$Power)
 hist(pwr$McFaddenR2)
 median(na.omit(pwr$Power))
 mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of all models ran
 sum(is.na(pwr$Power)) # models with convergence errors disallowing power calculation
 sum(ifelse(pwr$McFaddenR2 > 0.1, 1, 0))/nrow(pwr)
@@ -232,10 +229,9 @@ pw = pwr
 pwr = pwr %>% filter(Power >= .8)
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
-median(na.omit(pwr$Power))
-mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of  models ran
 nrow(pwr) / nrow(pw) # proportion of n
 #
@@ -243,10 +239,9 @@ nrow(pwr) / nrow(pw) # proportion of n
 pwr = pwr %>% filter(McFaddenR2 >= .2)
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
-median(na.omit(pwr$Power))
-mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of all models ran
 nrow(pwr) / nrow(pw) # proportion of n
 #
@@ -254,10 +249,9 @@ nrow(pwr) / nrow(pw) # proportion of n
 pwr = pw %>% filter(McFaddenR2 >= .2)
 hist(pwr$Power)
 hist(pwr$McFaddenR2)
-median(na.omit(pwr$Power))
-mad(na.omit(pwr$Power))
-median(na.omit(pwr$McFaddenR2))
-mad(na.omit(pwr$McFaddenR2))
+paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
+paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
+paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 nrow(pwr) # number of  models ran
 nrow(pwr) / nrow(pw) # proportion of n
 rm(pwr)
