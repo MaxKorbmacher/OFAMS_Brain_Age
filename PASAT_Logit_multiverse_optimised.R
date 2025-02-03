@@ -5,6 +5,7 @@ library(dplyr)
 library(pscl)
 library(parallel)
 library(bbmle)
+library(pROC)
 #
 # Load data
 data <- read.csv("/Users/max/Documents/Local/MS/results/interrim_data.csv")
@@ -35,6 +36,7 @@ results <- mclapply(all_formulas, function(formula) {
   tryCatch({
     # Fit the model
     model <- glm(formula, family = "binomial", data = data)
+    predicted = predict(model,data, type="response")
     
     # Extract coefficients
     coefs <- data.frame(
@@ -42,13 +44,15 @@ results <- mclapply(all_formulas, function(formula) {
       Beta = model$coefficients,
       SE = summary(model)$coefficients[, 2],
       P = summary(model)$coefficients[, 4],
-      Formula = call.to.char(formula) #(as.character(model$call)[2])
+      Formula = call.to.char(formula),
+      AUC = auc(model$data$FLG, predicted)[1]
     )
     
     # Return results
     list(
       formula = as.character(formula),
       pseudoR2 = pscl::pR2(model)["McFadden"],
+      AUC = auc(model$data$FLG, predicted)[1],
       coefs = coefs
     )
   }, error = function(e) {
@@ -64,7 +68,7 @@ results <- Filter(Negate(is.null), results)
 # Combine results
 if (length(results) > 0) {
   model_info <- do.call(rbind, lapply(results, function(res) {
-    data.frame(Formula = res$formula, McFaddenR2 = res$pseudoR2)
+    data.frame(Formula = res$formula, McFaddenR2 = res$pseudoR2, AUC = res$AUC)
   }))
   coef_table <- do.call(rbind, lapply(results, function(res) res$coefs))
   
