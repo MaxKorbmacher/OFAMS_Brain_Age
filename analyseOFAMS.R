@@ -450,6 +450,13 @@ edss_df = df3 %>% dplyr::select(eid, age, edss, session)
 #write.csv(edss_df,paste(savepath,"tmp_table.csv",sep=""))
 edss_df = read.csv(paste(savepath,"edss_age_table.csv",sep=""))
 #
+# showcase the variability in follow-up assessment time since clinical trial completion
+wideshape = reshape(edss_df, idvar = "eid", timevar = "session", direction = "wide")
+wideshape$diff = wideshape$age.144-wideshape$age.0 
+wideshape = wideshape %>% dplyr::select(eid,age.0,age.144,diff)
+range(wideshape$diff,na.rm = T)*12
+mean(wideshape$diff,na.rm = T)*12
+sd(wideshape$diff,na.rm = T)*12
 #
 #
 #
@@ -776,7 +783,8 @@ ICC(reshape(pasat1%>%dplyr::select(eid,session,PASAT),
             direction = "wide") %>% dplyr::select(-eid))
 # Prediction of the between-subject ageing effect 
 pasat1$CDG=factor(pasat1$CDG)
-riskm=lmer(PASAT ~ sex + age*CDG+ (1|eid),pasat1)
+riskm=lmer(PASAT ~ sex + age*CDG+ (1|eid),pasat1) # includes interaction effect
+#summary(riskm)
 cdg_plot=plot_model(riskm, type = "int")+
   xlab("Age")+ylab("Paced Auditory Serial Addition Test")+
   ggtitle("Predicted cognitive decline")+theme_bw()+theme(legend.position="none")

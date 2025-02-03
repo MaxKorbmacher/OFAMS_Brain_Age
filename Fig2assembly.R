@@ -331,7 +331,7 @@ plot1=ggforestplot::forestplot(
     scales = "free_y",
     space = "free"
   )
-plot1=annotate_figure(plot,top = "Predictors of functional loss group membership")
+plot1=annotate_figure(plot1,top = "Predictors of cognitive decline group membership")
 ggsave(plot = plot1, filename = "/Users/max/Documents/Local/MS/results/CDG_multiverse.pdf", width = 8, height = 8)
 #
 # make Odds ratio table
@@ -413,6 +413,6 @@ write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse_well_power
 
 # put it all together
 
-ppp=ggarrange(plot,plot1,ncol=1)
+ppp=ggarrange(plot,plot1,nrow=1)
 ggsave(plot = ppp, filename = "/Users/max/Documents/Local/MS/results/all_multiverse.pdf", width = 16, height = 8)
 ggsave(plot = ppp, filename = "/Users/max/Documents/Local/MS/results/Figure2.png", width = 16, height = 8)
