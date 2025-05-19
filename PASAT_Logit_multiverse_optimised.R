@@ -12,7 +12,7 @@ data <- read.csv("/Users/max/Documents/Local/MS/results/interrim_data.csv")
 #
 #
 # Predictors
-predictors <- c("geno", "relapses_12mnths_before_baseline", "CH3L.1..mg.ml..mean", 
+predictors <- c("geno", "relapses_12mnths_before_baseline", 
                 "NfL..pg.ml.", "edss", "PASAT", "smoking_OFAMS", "BL_BMI", 
                 "Omega3_suppl", "BAG_c", "baselineC", "baselineV",
                 "Vit_A_0","Vit_D_0", "Vit_E_0",
@@ -23,7 +23,7 @@ predictors <- c("geno", "relapses_12mnths_before_baseline", "CH3L.1..mg.ml..mean
 max_order <- 8
 all_combinations <- lapply(1:max_order, function(i) combn(predictors, i, simplify = FALSE))
 all_formulas <- unlist(lapply(all_combinations, function(comb_list) {
-  lapply(comb_list, function(comb) as.formula(paste("CLG ~ age +", paste(comb, collapse = " + "))))
+  lapply(comb_list, function(comb) as.formula(paste("CLG ~ age + Current_DMT +", paste(comb, collapse = " + "))))
 }))
 # Add optional terms (here, this is the covariate sex)
 all_formulas <- c(all_formulas, lapply(all_formulas, function(f) update(f, . ~ . + sex)))

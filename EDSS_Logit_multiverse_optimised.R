@@ -1,5 +1,5 @@
 # Multiverse for Logistic Regression Models
-# ChatGPT aided optimisation, Max Korbmacher 06 December 2024
+# ChatGPT aided optimisation, Max Korbmacher, May 2025
 #
 library(dplyr)
 library(pscl)
@@ -25,7 +25,7 @@ hist((data %>%filter(FLG == 0))$PF)
 max_order <- 8
 all_combinations <- lapply(1:max_order, function(i) combn(predictors, i, simplify = FALSE))
 all_formulas <- unlist(lapply(all_combinations, function(comb_list) {
-  lapply(comb_list, function(comb) as.formula(paste("FLG ~ age +", paste(comb, collapse = " + "))))
+  lapply(comb_list, function(comb) as.formula(paste("FLG ~ age + Current_DMT +", paste(comb, collapse = " + "))))
 }))
 # Add optional terms (here, this is the covariate sex)
 all_formulas <- c(all_formulas, lapply(all_formulas, function(f) update(f, . ~ . + sex)))

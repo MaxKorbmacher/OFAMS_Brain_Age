@@ -17,7 +17,7 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load(haven,car,dplyr,lme4,lmerTest,ggeffects,sjPlot,
                data.table,factoextra,simputation,ggpubr,psych,reshape2,
                gplots,rstatix,ggseg,marginaleffects,MuMIn,tidyr,#glmnet,ipflasso,parameters,
-               olsrr,parallel,gghighlight,cowplot,zoo,readxl)
+               olsrr,parallel,gghighlight,cowplot,zoo,readxl,Hmisc)
 #
 #
 # load data
@@ -53,7 +53,7 @@ edss_long = melt(edss, id.vars="Patnr")
 names(edss_long) = c("eid","session","edss")
 print("Note that we only have EDSS scores for baseline and certain follow-up times.")
 print("We can note an increase in EDSS scores over time. (Yet, with increasing variablility.)")
-edss_long %>% group_by(session) %>% summarize(M=mean(na.omit(edss)), SD=sd(na.omit(edss))) # show mean+sd for each session
+edss_long %>% dplyr::group_by(session) %>% dplyr::summarize(M=mean(na.omit(edss)), SD=sd(na.omit(edss))) # show mean+sd for each session
 levels(edss_long$session) = c(0,6,12,18,24) # standardize session names
 data$session = factor(data$session) # treat session as the factor it is also in the brain age data frame
 data = left_join(data,edss_long, by=c("eid","session")) # join edss and brain age data frames.
@@ -250,28 +250,11 @@ dev.off()
 print("There are multiple duplicates in the dataset")
 print(paste("To be exact: ",nrow(data)-nrow(unique(data))," rows.",sep=""))
 print("Another problem are the spread of participants in different session bins:")
-data %>% group_by(session) %>% summarize(N=length(na.omit((BAG))))
+data %>% group_by(session) %>% dplyr::summarize(N=length(na.omit((BAG))))
 print("We combat these problems in the representation of initial descriptives by excluding duplicates and low-N sessions.")
 df2 = filter(df,session == 0 | session == 6 | session == 24 |session == 120)
 print("All time points.")
 
-
-# ggplot(df, aes(session, BAG_c, group = eid, color = ""))+ #geom_point() + 
-#   geom_line() + scale_colour_manual(values = c("brown")) +
-#   theme_classic() + theme(legend.position = "none")
-# print("Only time points with sufficient data.")
-# ggplot(df2, aes(session, BAG_c, group = eid, color = ""))+ #geom_point() + 
-#    geom_line() + scale_colour_manual(values = c("brown")) +
-#    theme_classic() + theme(legend.position = "none")
-# print("All time points.")
-# ggplot(data= df, aes(x = session, y = BAG_c)) + 
-#   geom_point(size = 2, alpha= 1, color = "gray85") + #,  aes(color = eid) colour points by group
-#   geom_path(aes(group = eid), color = "gray85") + #spaghetti plot
-#   stat_smooth(aes(group = 1),color="blue",fill = "red")+ #method = "lm"
-#   ylab("Brain Age Gap") + xlab("Session") +
-#   stat_summary(aes(group = 1), fun.data = "mean_cl_boot", shape = 17, size = 0.6)+ # geom = "pointrange"
-#   theme_bw()
-# print("Only time points with sufficient data.")
 levels(df2$session) = c(0,1,2,3,4,5,6,7,8,9,12,24,144,18)
 BAG_descriptive = ggplot(data= df2[df2$eid %in% idlist$eid,], aes(x = session, y = BAG_c)) + 
   #scale_shape_manual(values=1:nlevels(factor(df2$eid))) +
@@ -478,16 +461,34 @@ edss_df = edss.0[edss.0$eid %in% idlist$eid,]
 # 
 edss_df$session = factor(edss_df$session)
 # to estimate the age and sex adjusted EDSS score, we use an LME
-## these are the participant with an edss equal or bigger 4
-idlist=edss_df[edss_df$eid %in% (edss_df %>% filter(session ==144 & edss>=3 | session ==24 & edss>=3| session ==18 & edss>=3| session ==12 & edss>=3| session ==6 & edss>3))$eid,]%>% dplyr::select(eid) %>% unique  %>% unlist() %>% c()
-# further filtering
 #idlist %in% ifelse((edss_df%>%filter(session ==144))$edss < (edss_df%>%filter(session ==24))$edss,(edss_df %>% filter(session==0))$eid,0)
 idlist=edss_df[edss_df$eid %in% (edss_df %>% filter(session ==144 & edss>=4 | session ==24 & edss>=4| session ==18 & edss>=4| session ==12 & edss>=4| session ==6 & edss>4))$eid,]%>% dplyr::select(eid) %>% unique  %>% unlist() %>% c()
-#211 and 604 improve; 215 and 806 are stable
-idlist = idlist[!idlist %in% c(211,215,604,806)]
-ids=length(idlist)
-# Specify characteristics of the functional decline group
-edss_df$FLG = ifelse(edss_df$eid %in% unlist(idlist), 1, 0)
+
+
+# We use the new filtering, as suggested by reviewer 1:
+# these increase 1.5 over the whole timespan, when baseline edss = 0
+edss_diff_num0 = edss_df[edss_df$eid %in% (edss_df %>% filter(session == 0 & edss == 0) %>% pull(eid)),] %>% filter(session ==144 & edss>=1.5) %>% pull(eid)
+slection_frame0 = data.frame(eid = edss_diff_num0, FLG = 1)
+# these increase at least 1 when baseline edss is between 1 and 5.5
+edss_diff_num = 
+  edss_df[edss_df$eid %in% (edss_df %>% filter(session == 0 & edss >= 1 & edss <= 5.5) %>% pull(eid)),] %>% filter(session ==144) %>% select(edss)- 
+  edss_df[edss_df$eid %in% (edss_df %>% filter(session == 0 & edss >= 1 & edss <= 5.5) %>% pull(eid)),] %>% filter(session ==0)%>% select(edss)
+
+slection_frame = data.frame(eid = edss_df[edss_df$eid %in% (edss_df %>% filter(session == 0 & edss >= 1 & edss <= 5.5) %>% pull(eid)),] %>% filter(session ==0) %>% pull(eid),
+           FLG = ifelse(edss_diff_num<1, 0,1))
+names(slection_frame) = c("eid","FLG")
+slection_frame = rbind(slection_frame, slection_frame0)
+#
+# finally, those who have a baseline edss ≥ 6
+edss_df %>% filter(session == 0 & edss >= 6) # NONE!
+edss_df = merge(edss_df,slection_frame,by="eid")
+
+ids= edss_df%>%filter(FLG == 1 & session == 0) %>%nrow()
+
+# missingness
+edss_df %>% group_by(session)%>%dplyr::summarize(NA.sum = sum(is.na(edss)), N = length(edss))
+edss_df %>% filter(FLG == 1) %>% group_by(session)%>%dplyr::summarize(NA.sum = sum(is.na(edss)), N = length(edss))
+
 mml = lmer(edss ~ session + age + sex + (1|eid),edss_df[edss_df$eid %in% idlist,])
 # get the time point 144 model coefficient
 cofff=summary(mml)$coefficients[5]
@@ -586,7 +587,7 @@ paste("EDSS: M=",round(mean(na.omit(edss$`0`)),2),"SD=",round(sd(na.omit(edss$`0
 ############### CHECK DISEASE AND SYMPOM DURATION AT BASELINE
 dem = (demo[!duplicated(demo$patno),] %>% filter(Patnr %in% edss$eid))
 paste("Disease duration: M=",round(mean(na.omit(dem$DISEASE_DURATION)),2),"SD=",round(sd(na.omit(dem$DISEASE_DURATION)),2))
-paste("Disease duration: M=",round(mean(na.omit(dem$SYMPTOM_DURATION)),2),"SD=",round(sd(na.omit(dem$SYMPTOM_DURATION)),2))
+paste("Symptom duration: M=",round(mean(na.omit(dem$SYMPTOM_DURATION)),2),"SD=",round(sd(na.omit(dem$SYMPTOM_DURATION)),2))
 #
 # Paced auditory serial addition test (PASAT) assessment ####
 t.test(demo10$PASAT_OFAMS10,demo10$BL_PASATcorrect,paired = T) # PASAT score decreases
@@ -748,6 +749,12 @@ a$CDG = ifelse(a$CDG<1,0,1)
 pasat_ids = a %>% filter(CDG > 0) %>% dplyr::select(eid) %>% unlist %>% unique # extract eids
 # add to main df
 pasat1$CDG = pasat1$eid %in% pasat_ids
+
+# missingness
+pasat1 %>% group_by(session)%>%dplyr::summarize(NA.sum = sum(is.na(PASAT)), N = length(PASAT))
+pasat1 %>% filter(CDG == 1) %>% group_by(session)%>%dplyr::summarize(NA.sum = sum(is.na(PASAT)), N = length(PASAT))
+
+
 #pasat_ids = pasat1 %>% filter(CDG == 1) %>% select(eid) %>% unlist %>% unique
 #pasat_ids=(pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT<40))$eid,]) %>% select(eid) %>%unique() %>% unlist()
 #pasat1[pasat1$eid %in% (pasat1 %>% filter(session ==144 & PASAT>=4 | session ==24 & PASAT>=4| session ==18 & PASAT>=4| session ==12 & PASAT>=4| session ==6 & PASAT>4))$eid,]%>% dplyr::select(eid) %>% unique  %>% unlist() %>% c()
@@ -810,6 +817,7 @@ pasat1 %>% filter(eid %in% c(1503,809,813)) %>% filter(CDG ==T)
 # check whether CLG has faster change in PASAT over time than CSIG
 summary(lmer(PASAT~age*CDG+sex+(1|eid),pasat1))
 #
+prom = merge(prom,demo10 %>% select(eid,Current_DMT), by="eid")
 write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
 #
 #
