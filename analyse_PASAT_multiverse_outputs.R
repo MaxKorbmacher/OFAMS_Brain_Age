@@ -21,13 +21,16 @@ model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Form
 paste("Recap. The number of models run was ", nrow(na.omit(model_info)), " with ", round(sum(ifelse(model_info$McFaddenR2>.2,1,0))/nrow(model_info)*100,2), "% showing an excellent model fit.", sep="")
 paste("Good model fit (R2>10%): ", round(sum(ifelse(model_info$McFaddenR2>.1,1,0))/nrow(model_info)*100,2), "%.", sep="")
 paste("Median McFadden pseudo R2 = ",round(median(model_info$McFaddenR2),2),"±",round(mad(model_info$McFaddenR2),2),sep="")
+paste("AUC =",round(median(model_info$AUC),2),"±",round(mad(model_info$AUC),2))
 # Second, we can remove mis-specified models for the same display
 paste("Now, we look only at well-powered models.")
 pwr = read.csv("/Users/max/Documents/Local/MS/results/CLG_power.csv")
 pwr$Formula = gsub("CLG ~ ","",pwr$Formula)
 paste("Convergig models for power calculations: ", length(na.omit(pwr$pwr)), sep="")
 paste("Median power: ", 100*median(na.omit(pwr$pwr)),"±",100*mad(na.omit(pwr$pwr)), "%.", sep="")
+#paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
 model_info = merge(model_info,pwr,by="Formula")
+paste("AUC =",round(median(model_info$AUC),2),"±",round(mad(model_info$AUC),2))
 #write.csv(x = model_info, "/Users/max/Documents/Local/MS/results/model_info.csv")
 # parameter info
 coef_table = read.csv("/Users/max/Documents/Local/MS/results/PASAT_stratification_optimised.csv")
@@ -73,7 +76,7 @@ l$Names = gsub("baselineC", "Lesion count", l$Names)
 l$Names = gsub("TotalVol", "Brain volume", l$Names)
 l$Names = gsub("TIV", "Intracranial volume", l$Names)
 l$Names = gsub("geno", "HLA-DRB1 carrier", l$Names)
-l$Names = gsub("CH3L.1..mg.ml..mean", "Chitinase-3 like-protein-1 mg/ml", l$Names)
+#l$Names = gsub("CH3L.1..mg.ml..mean", "Chitinase-3 like-protein-1 mg/ml", l$Names)
 l$Names = gsub("BL_BMI", "Body Mass Index", l$Names)
 l$Names = gsub("edss_baseline", "EDSS", l$Names)
 l$Names = gsub("Vit_A_0", "Vitamin A umol/L", l$Names)
@@ -101,7 +104,7 @@ l$Names = gsub("Omega3_suppl","Omega 3 supplement received",l$Names)
 l=l[order(l$Names),] # order by name
 l = l%>%filter(Names != "(Intercept)")
 l$group = c("General", "Patient-reported outcome measures","General","Brain markers",
-  "Omics", "Clinical markers", "Patient-reported outcome measures",
+  "Intervention", "Clinical markers", "Patient-reported outcome measures",
   "Omics", "Brain markers", "Brain markers",
   "Patient-reported outcome measures", "Omics",
   "Intervention","Clinical markers","Patient-reported outcome measures",
@@ -139,7 +142,7 @@ l$Names = gsub("baselineC", "Lesion count", l$Names)
 l$Names = gsub("TotalVol", "Brain volume", l$Names)
 l$Names = gsub("TIV", "Intracranial volume", l$Names)
 l$Names = gsub("geno", "HLA-DRB1 carrier", l$Names)
-l$Names = gsub("CH3L.1..mg.ml..mean", "Chitinase-3 like-protein-1 mg/ml", l$Names)
+l$Names = gsub("Current_DMT", "Disease modifying treatment", l$Names)
 l$Names = gsub("BL_BMI", "Body Mass Index", l$Names)
 l$Names = gsub("edss_baseline", "EDSS", l$Names)
 l$Names = gsub("Vit_A_0", "Vitamin A umol/L", l$Names)
