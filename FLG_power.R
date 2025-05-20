@@ -18,13 +18,11 @@ data <- data_unique(data = data, select = eid)
 
 # 1. POWER ####
 # Predictors
-predictors <- c(
-  "geno", "relapses_12mnths_before_baseline", 
-  "NfL..pg.ml.", "edss", "PASAT", "smoking_OFAMS", "BL_BMI", 
-  "Omega3_suppl", "BAG_c", "baselineC", "baselineV", 
-  "PF", "BP", "GH", "VT", "SF", "MH", "Vit_A_0", "Vit_D_0", 
-  "Vit_E_0" # "Treatment_OFAMS", "RE", "RF" >> variability = 0
-)
+predictors <- c("geno", "relapses_12mnths_before_baseline", 
+                "NfL..pg.ml.", "edss", "PASAT", "smoking_OFAMS", "BL_BMI", 
+                "Omega3_suppl", "BAG_c", "baselineC", "baselineV",
+                "Vit_A_0","Vit_D_0", "Vit_E_0",
+                "PF", "BP", "VT","MH")
 
 # Generate model formulas up to the 5th order
 max_order <- 8
