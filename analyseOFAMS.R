@@ -222,6 +222,10 @@ for(i in 1:length(translist3)){
 # for(i in 1:length(translist2)){
 #   data[grep(paste("^",translist2[i],"$",sep=""), colnames(data))] = c(as.integer(trans2(unlist(data[grep(paste("^",translist2[1],"$",sep=""), colnames(data))]))))
 # }
+#
+# briefly explore whether factor analysis can add some value here
+data %>% filter(session == 0) %>% select(starts_with("spm")) %>% na.omit() %>% factanal(3)
+
 # note that the scale levels differ and absolute sum scores have to be used.
 data$PF = data%>%dplyr::select(contains("spm3")) %>% rowSums()/10 # Physical functioning (PF)
 data$RF = data%>%dplyr::select(contains("spm4")) %>% rowSums()/4 # Role-physical (RF)
@@ -526,7 +530,7 @@ EDSS_descriptive = ggarrange(e1,e2)
 riskm=lmer(edss ~ sex + age*FLG+ (1|eid),edss_df)
 flg_plot=plot_model(riskm, type = "int")+
   xlab("Age")+ylab("Expanded Disability Status Scale")+
-  ggtitle("Predicted functional loss")+theme_bw()+theme(legend.position="none")
+  ggtitle("Predicted disability progression")+theme_bw()+theme(legend.position="none")
 
 # col = ifelse(edss_df$edss>=4,"red","gray85")
 # EDSS_descriptive = ggplot(data= edss_df, aes(x = factor(session,level=level_order), y = edss)) + 
@@ -704,7 +708,7 @@ prom=full_join(jj,prom,by="eid")
 prom = prom %>% dplyr::select(eid,FLG,age,sex,edss,PASAT,geno,relapses_12mnths_before_baseline,
                        CH3L.1..mg.ml..mean,NfL..pg.ml.,smoking_OFAMS,BL_BMI,
                        Treatment_OFAMS,Omega3_suppl,baselineC,baselineV,
-                       PF,RF,BP,GH,VT,SF,RE,MH,Vit_A_0,Vit_D_0,Vit_E_0)
+                       PF,RF,BP,GH,VT,SF,RE,MH,Vit_A_0,Vit_D_0,Vit_E_0,age_gap)
 prom=full_join((df %>% filter(session == 0) %>% dplyr::select(eid,BAG_c)),prom,by=c("eid"))
 prom = (unique(prom))
 prom = prom[prom$eid %in% unique(edss_df$eid),]
@@ -794,7 +798,7 @@ riskm=lmer(PASAT ~ sex + age*CDG+ (1|eid),pasat1) # includes interaction effect
 #summary(riskm)
 cdg_plot=plot_model(riskm, type = "int")+
   xlab("Age")+ylab("Paced Auditory Serial Addition Test")+
-  ggtitle("Predicted cognitive decline")+theme_bw()+theme(legend.position="none")
+  ggtitle("Predicted processing speed decline")+theme_bw()+theme(legend.position="none")
 #
 #
 # Marginal effect plot showcasing differential ageing trajectories
@@ -817,7 +821,9 @@ pasat1 %>% filter(eid %in% c(1503,809,813)) %>% filter(CDG ==T)
 # check whether CLG has faster change in PASAT over time than CSIG
 summary(lmer(PASAT~age*CDG+sex+(1|eid),pasat1))
 #
-prom = merge(prom,demo10 %>% select(eid,Current_DMT), by="eid")
+prom = merge(prom,demo10 %>% dplyr::select(eid,Current_DMT), by="eid")
+demo$eid = demo$Patnr
+prom = merge(prom,demo %>% dplyr::select(eid,DISEASE_DURATION,SYMPTOM_DURATION), by="eid")
 write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
 #
 #

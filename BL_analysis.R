@@ -13,6 +13,7 @@ library(datawizard)
 library(rlist)
 library(WebPower)
 library(naniar)
+library(ggplot2)
 #
 data = data_unique(data = data, select = eid)
 #
@@ -50,7 +51,7 @@ names(missi) = gsub("edss","Expanded Disability Status Scale (EDSS)",names(missi
 names(missi) = gsub("PASAT","Paced Auditory Serial Addition Test (PASAT)",names(missi))
 names(missi) = gsub("Omega3_suppl","Omega 3 supplement received",names(missi))
 missi=missi[order(names(missi)),] # order by name
-missi = gg_miss_var(missi%>%select(-c(eid,X,CLG,FLG)))
+missi = gg_miss_var(missi%>%dplyr::select(-c(eid,X,CLG,FLG)))
 ggsave(paste(datapath,"missingness.pdf",sep=""),missi)
 rm(missi)
 #
@@ -128,9 +129,9 @@ demotab=function(var){
   p = summary(FLG.imp)$coefficients[2,4]
   return(data.frame(var,M_FLG,SD_FLG,M_FSG,SD_FSG,B,SE,CI_low, CI_high, t,p))
 }
-contvar = c("BAG_c","baselineC","baselineV","edss","PASAT",
+contvar = c("DISEASE_DURATION","age_gap","BAG_c","baselineC","baselineV","edss","PASAT",
             "relapses_12mnths_before_baseline","BL_BMI",
-            "CH3L.1..mg.ml..mean", "NfL..pg.ml.",
+            "NfL..pg.ml.",
             "Vit_A_0", "Vit_D_0","Vit_E_0", "BP", "GH", "MH",
             "PF", "SF", "VT") # constants: "RE", "RF"
 demg = list()
@@ -154,7 +155,8 @@ demotab2=function(var){
   p = summary(FLG.imp)$coefficients[2,4]
   return(data.frame(var,M_FLG,SD_FLG,M_FSG,SD_FSG,B,SE,CI_low, CI_high, t,p))
 }
-demg = rbind(demotab2("age"),demg)
+
+demg = rbind(demotab2("age"),(demg))
 demg[2:(ncol(demg)-1)] = round(demg[2:(ncol(demg)-1)], 2)
 demg$p = round(demg$p,4)
 demg$FSG = paste(demg$M_FSG," (",demg$SD_FSG,")",sep="")
@@ -174,7 +176,7 @@ mad(unlist(na.omit(data%>%filter(FLG == 0))["edss"]))
 # Differences in frequencies ####
 # FLG 1 = FLG
 # sex: 1=female, 0=male
-binaries = c("sex", "smoking_OFAMS","Omega3_suppl", "geno")
+binaries = c("sex", "smoking_OFAMS","Omega3_suppl", "geno","Current_DMT")
 res=list()
 for (i in 1:length(binaries)){
   # how the sausage is made, but obsolete for OR, CI, p:
@@ -306,7 +308,8 @@ demg$p = round(demg$p,4)
 demg$CSIG = paste(demg$M_CSIG," (",demg$SD_CSIG,")",sep="")
 demg$CLG = paste(demg$M_CLG," (",demg$SD_CLG,")",sep="")
 demg$Difference = paste(demg$B," (",demg$SE,")",sep="")
-demg = demg %>% dplyr::select(CLG,CSIG,Difference,CI_low,CI_high,t,p)
+demg$CI = paste(round(demg$CI_low,2), "; ",round(demg$CI_high,2),sep="")
+demg = demg %>% dplyr::select(CLG,CSIG,Difference,CI,t,p)
 write.csv(x = demg, paste(datapath,"PASAT_descriptive_continuous.csv",sep=""))
 #
 # finally, check median and mad for edss
@@ -314,13 +317,14 @@ median(unlist(na.omit(data%>%filter(CLG == 1))["edss"]))
 mad(unlist(na.omit(data%>%filter(CLG == 1))["edss"]))
 median(unlist(na.omit(data%>%filter(CLG == 0))["edss"]))
 mad(unlist(na.omit(data%>%filter(CLG == 0))["edss"]))
+# wilcox.test(edss~CLG,data)
+# wilcox_effsize(data,edss~CLG,ci=T)
 #
 #
 #
 # Differences in frequencies ####
 # CLG 1 = CLG
 # sex: 1=female, 0=male
-binaries = c("sex", "smoking_OFAMS","Omega3_suppl", "geno")
 res=list()
 for (i in 1:length(binaries)){
   # how the sausage is made, but obsolete for OR, CI, p:
