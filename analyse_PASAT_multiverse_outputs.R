@@ -16,12 +16,14 @@ library(ggforce)
 # Load data
 # model info
 model_info = read.csv("/Users/max/Documents/Local/MS/results/PASAT_model_info_optimised.csv")
-model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "FLG")
+model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "CLG")
 # First, some general information from the model_info object
 paste("Recap. The number of models run was ", nrow(na.omit(model_info)), " with ", round(sum(ifelse(model_info$McFaddenR2>.2,1,0))/nrow(model_info)*100,2), "% showing an excellent model fit.", sep="")
 paste("Good model fit (R2>10%): ", round(sum(ifelse(model_info$McFaddenR2>.1,1,0))/nrow(model_info)*100,2), "%.", sep="")
 paste("Median McFadden pseudo R2 = ",round(median(model_info$McFaddenR2),2),"±",round(mad(model_info$McFaddenR2),2),sep="")
 paste("AUC =",round(median(model_info$AUC),2),"±",round(mad(model_info$AUC),2))
+paste("Brier =",round(median(model_info$Brier),2),"±",round(mad(model_info$Brier),2))
+
 # Second, we can remove mis-specified models for the same display
 paste("Now, we look only at well-powered models.")
 pwr = read.csv("/Users/max/Documents/Local/MS/results/CLG_power.csv")
@@ -76,6 +78,7 @@ l$Names = gsub("baselineC", "Lesion count", l$Names)
 l$Names = gsub("TotalVol", "Brain volume", l$Names)
 l$Names = gsub("TIV", "Intracranial volume", l$Names)
 l$Names = gsub("geno", "HLA-DRB1 carrier", l$Names)
+l$Names = gsub("Current_DMT", "Disease modifying treatment", l$Names)
 #l$Names = gsub("CH3L.1..mg.ml..mean", "Chitinase-3 like-protein-1 mg/ml", l$Names)
 l$Names = gsub("BL_BMI", "Body Mass Index", l$Names)
 l$Names = gsub("edss_baseline", "EDSS", l$Names)
@@ -104,14 +107,14 @@ l$Names = gsub("Omega3_suppl","Omega 3 supplement received",l$Names)
 l=l[order(l$Names),] # order by name
 l = l%>%filter(Names != "(Intercept)")
 l$group = c("General", "Patient-reported outcome measures","General","Brain markers",
-  "Intervention", "Clinical markers", "Patient-reported outcome measures",
-  "Omics", "Brain markers", "Brain markers",
-  "Patient-reported outcome measures", "Omics",
-  "Intervention","Clinical markers","Patient-reported outcome measures",
-  "Clinical markers",
-  "General","General","Patient-reported outcome measures",
-  "Patient-reported outcome measures", "Omics",
-  "Omics", "Omics")
+            "Intervention", "Clinical markers",
+            "Omics", "Brain markers", "Brain markers",
+            "Patient-reported outcome measures", "Omics",
+            "Intervention","Clinical markers","Patient-reported outcome measures",
+            "Clinical markers",
+            "General","General",
+            "Patient-reported outcome measures", "Omics",
+            "Omics", "Omics")
 plot=ggforestplot::forestplot(
   df = l,
   name = Names,
@@ -170,12 +173,12 @@ l$Names = gsub("Omega3_suppl","Omega 3 supplement received",l$Names)
 l=l[order(l$Names),] # order by name
 l = l%>%dplyr::filter(Names != "(Intercept)")
 l$group = c("General", "Patient-reported outcome measures","General","Brain markers",
-            "Omics", "Clinical markers", "Patient-reported outcome measures",
+            "Intervention", "Clinical markers",
             "Omics", "Brain markers", "Brain markers",
             "Patient-reported outcome measures", "Omics",
             "Intervention","Clinical markers","Patient-reported outcome measures",
             "Clinical markers",
-            "General","General","Patient-reported outcome measures",
+            "General","General",
             "Patient-reported outcome measures", "Omics",
             "Omics", "Omics")
 return(l)
@@ -183,23 +186,23 @@ return(l)
 l = mktable(coef_table)
 write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse.csv")
 #
-# Consider only well-powered models ####
-coef_table$Power = coef_table$pwr
-cor(coef_table$Power,coef_table$McFaddenR2,use = "pairwise.complete.obs") # just for my own interest: R2 and power correlation
-# note, there is no correspondence when considering low-power outcomes
-c1 = coef_table %>% dplyr::filter(Power >= 0.8) # filter for power ≥ 80%
-cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # Now, there is a better correspondence between R2 and power
-l = mktable(c1)
-write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse_well_powered.csv")
-
-# Consider only high R2 models ####
-c1 = coef_table %>% dplyr::filter(McFaddenR2>.2)
-cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # This time a negative correlation between R2 and power?!
-l = mktable(c1)
-write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse_high_R2.csv")
-
-# Consider only well-powered and high R2 models ####
-c1 = c1 %>% dplyr::filter(Power>.8)
-cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # WORSE correspondence between R2 and power
-l = mktable(c1)
-write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse_well_powered_and_high_R2.csv")
+# # Consider only well-powered models ####
+# coef_table$Power = coef_table$pwr
+# cor(coef_table$Power,coef_table$McFaddenR2,use = "pairwise.complete.obs") # just for my own interest: R2 and power correlation
+# # note, there is no correspondence when considering low-power outcomes
+# c1 = coef_table %>% dplyr::filter(Power >= 0.8) # filter for power ≥ 80%
+# cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # Now, there is a better correspondence between R2 and power
+# l = mktable(c1)
+# write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse_well_powered.csv")
+# 
+# # Consider only high R2 models ####
+# c1 = coef_table %>% dplyr::filter(McFaddenR2>.2)
+# cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # This time a negative correlation between R2 and power?!
+# l = mktable(c1)
+# write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse_high_R2.csv")
+# 
+# # Consider only well-powered and high R2 models ####
+# c1 = c1 %>% dplyr::filter(Power>.8)
+# cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # WORSE correspondence between R2 and power
+# l = mktable(c1)
+# write.csv(x = l,"/Users/max/Documents/Local/MS/results/CDG_multiverse_well_powered_and_high_R2.csv")

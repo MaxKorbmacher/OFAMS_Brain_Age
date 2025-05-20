@@ -1,6 +1,6 @@
 # Analyse functionally stable or improving group (FSIG) vs functional loss group (FLG) multiverse outputs
 #
-# Max Korbmacher, 14 Nov 2024
+# Max Korbmacher, May 2025
 #
 rm(list = ls(all.names = TRUE)) # clear all objects includes hidden objects.
 gc() #free up memory and report the memory usage.
@@ -27,10 +27,11 @@ paste("Recap. The number of models run was ", nrow(na.omit(model_info)), " with 
 paste("Good model fit (R2>10%): ", round(sum(ifelse(model_info$McFaddenR2>.1,1,0))/nrow(model_info)*100,2), "%.", sep="")
 paste("Median McFadden pseudo R2 = ",round(median(model_info$McFaddenR2),4),"±",round(mad(model_info$McFaddenR2),2),sep="")
 paste("AUC =",round(median(model_info$AUC),2),"±",round(mad(model_info$AUC),2))
+paste("Brier =",round(median(model_info$Brier),2),"±",round(mad(model_info$Brier),2))
 # Second, we can remove mis-specified models for the same display
 paste("Now, we look only at well-powered models.")
 pwr = read.csv("/Users/max/Documents/Local/MS/results/power.csv")
-pwr$Formula = gsub("FLG ~ ","",pwr$Formula)
+#pwr$Formula = gsub("FLG ~ ","",pwr$Formula)
 model_info = merge(model_info,pwr,by="Formula")
 paste("Convergig models for power calculations: ", length(na.omit(model_info$pwr)), sep="")
 paste("Median power: ", 100*median(na.omit(model_info$pwr)),"±",100*mad(na.omit(model_info$pwr)), "%.", sep="")
@@ -89,6 +90,7 @@ l$Names = gsub("BP", "Bodily pain", l$Names)
 l$Names = gsub("GH", "General health", l$Names)
 l$Names = gsub("VT", "Vitality", l$Names)
 l$Names = gsub("SF", "Social functioning", l$Names)
+l$Names = gsub("Current_DMT", "Disease modifying treatment", l$Names)
 #l$Names = gsub("RE", "Role-emotional", l$Names)
 l$Names = gsub("MH", "Mental health", l$Names)
 l$Names = gsub("BAG_c", "Brain age gap", l$Names)
@@ -104,14 +106,13 @@ l$Names = gsub("PASAT","Paced Auditory Serial Addition Test (PASAT)",l$Names)
 l$Names = gsub("Omega3_suppl","Omega 3 supplement received",l$Names)
 l=l[order(l$Names),] # order by name
 l = l%>%filter(Names != "(Intercept)")
-l$Names
 l$group = c("General", "Patient-reported outcome measures","General","Brain markers",
-  "Omics", "Clinical markers", "Patient-reported outcome measures",
+  "Intervention", "Clinical markers",
   "Omics", "Brain markers", "Brain markers",
   "Patient-reported outcome measures", "Omics",
   "Intervention","Clinical markers","Patient-reported outcome measures",
   "Clinical markers",
-  "General","General","Patient-reported outcome measures",
+  "General","General",
   "Patient-reported outcome measures", "Omics",
   "Omics", "Omics")
 plot=ggforestplot::forestplot(
@@ -121,7 +122,7 @@ plot=ggforestplot::forestplot(
   se = Beta_MAD,
   xlab="Median odds ratio ± median absolute deviation",
   logodds = TRUE,
-  #pvalue = P_Md,
+  pvalue = P_Md,
   psignif = .05
 )+
   ggforce::facet_col(
@@ -130,7 +131,7 @@ plot=ggforestplot::forestplot(
     space = "free"
   )
 #plot=annotate_figure(plot,top = "Predictors of functional loss group membership")
-ggsave(plot = plot, filename = "/Users/max/Documents/Local/MS/results/FDG_multiverse.pdf", width = 8, height = 8)
+ggsave(plot = plot, filename = "/Users/max/Documents/Local/MS/results/EDSS_multiverse.pdf", width = 8, height = 8)
 #
 # make Odds ratio table
 mktable = function(coef_table){
@@ -173,36 +174,36 @@ l$Names = gsub("Omega3_suppl","Omega 3 supplement received",l$Names)
 l=l[order(l$Names),] # order by name
 l = l%>%dplyr::filter(Names != "(Intercept)")
 l$group = c("General", "Patient-reported outcome measures","General","Brain markers",
-            "Omics", "Clinical markers", "Patient-reported outcome measures",
+            "Intervention", "Clinical markers",
             "Omics", "Brain markers", "Brain markers",
             "Patient-reported outcome measures", "Omics",
             "Intervention","Clinical markers","Patient-reported outcome measures",
             "Clinical markers",
-            "General","General","Patient-reported outcome measures",
+            "General","General",
             "Patient-reported outcome measures", "Omics",
             "Omics", "Omics")
 return(l)
 }
 l = mktable(coef_table)
-write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse.csv")
+write.csv(x = l,"/Users/max/Documents/Local/MS/results/EDSS_multiverse.csv")
 #
-# Consider only well-powered models ####
-coef_table$Power = coef_table$pwr
-cor(coef_table$Power,coef_table$McFaddenR2,use = "pairwise.complete.obs") # just for my own interest: R2 and power correlation
-# note, there is no correspondence when considering low-power outcomes
-c1 = coef_table %>% dplyr::filter(Power >= 0.8) # filter for power ≥ 80%
-cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # Now, there is a better correspondence between R2 and power
-l = mktable(c1)
-write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_well_powered.csv")
-
-# Consider only high R2 models ####
-c1 = coef_table %>% dplyr::filter(McFaddenR2>.2)
-cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # This time a negative correlation between R2 and power?!
-l = mktable(c1)
-write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_high_R2.csv")
-
-# Consider only well-powered and high R2 models ####
-c1 = c1 %>% dplyr::filter(Power>.8)
-cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # WORSE correspondence between R2 and power
-l = mktable(c1)
-write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_well_powered_and_high_R2.csv")
+# # Consider only well-powered models ####
+# coef_table$Power = coef_table$pwr
+# cor(coef_table$Power,coef_table$McFaddenR2,use = "pairwise.complete.obs") # just for my own interest: R2 and power correlation
+# # note, there is no correspondence when considering low-power outcomes
+# c1 = coef_table %>% dplyr::filter(Power >= 0.8) # filter for power ≥ 80%
+# cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # Now, there is a better correspondence between R2 and power
+# l = mktable(c1)
+# write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_well_powered.csv")
+# 
+# # Consider only high R2 models ####
+# c1 = coef_table %>% dplyr::filter(McFaddenR2>.2)
+# cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # This time a negative correlation between R2 and power?!
+# l = mktable(c1)
+# write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_high_R2.csv")
+# 
+# # Consider only well-powered and high R2 models ####
+# c1 = c1 %>% dplyr::filter(Power>.8)
+# cor(c1$Power,c1$McFaddenR2,use = "pairwise.complete.obs") # WORSE correspondence between R2 and power
+# l = mktable(c1)
+# write.csv(x = l,"/Users/max/Documents/Local/MS/results/FDG_multiverse_well_powered_and_high_R2.csv")
