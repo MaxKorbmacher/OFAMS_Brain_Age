@@ -224,8 +224,9 @@ for(i in 1:length(translist3)){
 # }
 #
 # briefly explore whether factor analysis can add some value here
-data %>% filter(session == 0) %>% select(starts_with("spm")) %>% na.omit() %>% factanal(3)
-
+#data %>% filter(session == 0) %>% select(starts_with("spm")) %>% na.omit() %>% factanal(3)
+# this leads to singlularity!!!
+#
 # note that the scale levels differ and absolute sum scores have to be used.
 data$PF = data%>%dplyr::select(contains("spm3")) %>% rowSums()/10 # Physical functioning (PF)
 data$RF = data%>%dplyr::select(contains("spm4")) %>% rowSums()/4 # Role-physical (RF)

@@ -63,7 +63,7 @@ rm(missi)
 model_info = read.csv(paste(datapath,"EDSS_model_info_optimised.csv",sep=""))
 model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "FLG")
 pwr = read.csv(paste(datapath,"power.csv",sep=""))
-pwr$Formula = gsub("FLG ~ ","",pwr$Formula)
+#pwr$Formula = gsub("FLG ~ ","",pwr$Formula)
 pwr = merge(model_info,pwr,by="Formula")
 write.csv(x = model_info, paste(datapath,"model_info.csv",sep=""))
 rm(model_info)
@@ -210,7 +210,7 @@ write.csv(x = res, paste(datapath,"descriptive_binary.csv",sep=""))
 model_info = read.csv(paste(datapath,"PASAT_model_info_optimised.csv",sep=""))
 model_info = model_info %>% dplyr::filter(Formula != "~") %>% dplyr::filter(Formula != "CLG")
 pwr = read.csv(paste(datapath,"CLG_power.csv",sep=""))
-pwr$Formula = gsub("CLG ~ ","",pwr$Formula)
+#pwr$Formula = gsub("CLG ~ ","",pwr$Formula)
 pwr = merge(model_info,pwr,by="Formula")
 rm(model_info)
 # all models
@@ -228,9 +228,9 @@ sum(ifelse(pwr$McFaddenR2 > 0.1, 1, 0))/nrow(pwr)
 #
 # high enough power models
 pw = pwr
-pwr = pwr %>% filter(Power >= .8)
-hist(pwr$Power)
-hist(pwr$McFaddenR2)
+pwr %>% filter(Power >= .8)
+hist(pw$Power)
+hist(pw$McFaddenR2)
 paste("Power =",round(median(na.omit(pwr$Power)),2),"±",round(mad(na.omit(pwr$Power)),2))
 paste("pR2 =",round(median(pwr$McFaddenR2),2),"±",round(mad(pwr$McFaddenR2),2))
 paste("AUC =",round(median(pwr$AUC),2),"±",round(mad(pwr$AUC),2))
@@ -263,6 +263,7 @@ rm(pwr)
 #
 # 2.2 DEMOGRAPHICS: BL differences between CLG and non-CLG patients ####
 # Differences in continuous scores ####
+
 demotab=function(var){
   M_CLG = mean(unlist(na.omit(data%>%filter(CLG == 1))[var]))
   SD_CLG = sd(unlist(na.omit(data%>%filter(CLG == 1))[var]))
@@ -277,11 +278,7 @@ demotab=function(var){
   p = summary(CLG.imp)$coefficients[2,4]
   return(data.frame(var,M_CLG,SD_CLG,M_CSIG,SD_CSIG,B,SE,CI_low, CI_high, t,p))
 }
-contvar = c("BAG_c","baselineC","baselineV","edss","PASAT",
-            "relapses_12mnths_before_baseline","BL_BMI",
-            "CH3L.1..mg.ml..mean", "NfL..pg.ml.",
-            "Vit_A_0", "Vit_D_0","Vit_E_0", "BP", "GH", "MH",
-            "PF", "SF", "VT") # constants: "RE", "RF"
+
 demg = list()
 for (i in 1:length(contvar)){
   demg[[i]] = demotab(contvar[i])
