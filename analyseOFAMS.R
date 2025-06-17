@@ -743,9 +743,9 @@ a = a[order(a$eid),]
 b = b[order(b$eid),]
 c = c[order(c$eid),]
 #a$CDG = ifelse(b$preds>c$preds & a$preds>c$preds,1,0) + ifelse(is.na(c$pres) == T & a$preds>b$preds,1,0) # make sure cognition declines
-a$CDG = ifelse(is.na(ifelse(c$PASAT-a$PASAT <= -15,1,0)),0,ifelse(c$PASAT-a$PASAT <= -15,1,0)) + 
+a$CDG = ifelse(is.na(ifelse(c$PASAT-a$PASAT <= -12,1,0)),0,ifelse(c$PASAT-a$PASAT <= -12,1,0)) + 
   ifelse(b$PASAT<40 & is.na(c$PASAT), 1,0) +
-  ifelse(is.na(ifelse(c$PASAT-b$PASAT <= -15,1,0)),0,ifelse(c$PASAT-b$PASAT <= -15,1,0))
+  ifelse(is.na(ifelse(c$PASAT-b$PASAT <= -12,1,0)),0,ifelse(c$PASAT-b$PASAT <= -12,1,0))
 #a$CDG = ifelse(c$PASAT<40 | b$PASAT<40, 1, 0) + ifelse(b$PASAT<40 & is.na(c$PASAT), 1,0)
 a$improve = ifelse(b$PASAT<c$PASAT,-1,0) + ifelse(b$PASAT<40 & is.na(c$PASAT), 1,0) # define PASAT < 40
 a$improve = ifelse(is.na(a$improve) == T,0,a$improve)
@@ -826,6 +826,10 @@ prom = merge(prom,demo10 %>% dplyr::select(eid,Current_DMT), by="eid")
 demo$eid = demo$Patnr
 prom = merge(prom,demo %>% dplyr::select(eid,DISEASE_DURATION,SYMPTOM_DURATION), by="eid")
 write.csv(prom,paste(savepath,"interrim_data.csv",sep=""))
+
+prom$FLG = factor(prom$FLG)
+levels(prom$FLG) = c("no", "yes")
+table(prom$FLG,prom$CLG)
 #
 #
 ################ CHECK BASELINE PASAT
