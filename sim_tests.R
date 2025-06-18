@@ -42,7 +42,7 @@ stats = rbind(stats,data.frame(AUC = auc(model3$data$FLG,predict(model3,data)),
                                Brier = DescTools::BrierScore(model3),
                                AIC = AIC(model3),BIC = BIC(model3)))
 
-cbind( 	exp(coef(model3)), 	exp(summary(model3)$coefficients[,1] - 1.96*summary(model3)$coefficients[,2]), 	exp(summary(model3)$coefficients[,1] + 1.96*summary(model3)$coefficients[,2]) )
+cbind( 	exp(coef(model)), 	exp(summary(model)$coefficients[,1] - 1.96*summary(model)$coefficients[,2]), 	exp(summary(model)$coefficients[,1] + 1.96*summary(model)$coefficients[,2]) )
 
 
 curious = data.frame(cbind( 	exp(coef(model)), 	exp(summary(model)$coefficients[,1] - 1.96*summary(model)$coefficients[,2]), 	exp(summary(model)$coefficients[,1] + 1.96*summary(model)$coefficients[,2]) ))
@@ -137,7 +137,7 @@ model2 = glm(CLG ~ .,data=data%>%select(-FLG,-RF,-RE,-GH,-SF,-baselineC, -baseli
 stats = rbind(stats,data.frame(AUC = auc(model2$data$CLG,predict(model2,data)),
                                Brier = DescTools::BrierScore(model2),
                                AIC = AIC(model2),BIC = BIC(model2)))
-model3 = glm(CLG~.,data=data%>%select(CLG,Current_DMT),family = "binomial")
+model3 = glm(CLG~.,data=data%>%select(CLG,Current_DMT,PASAT),family = "binomial")
 data.frame(AUC = auc(model3$data$CLG,predict(model3,data)),Brier = DescTools::BrierScore(model3),
            AIC = AIC(model3),BIC = BIC(model3))
 stats = rbind(stats,data.frame(AUC = auc(model3$data$CLG,predict(model3,data)),
@@ -150,26 +150,26 @@ stats[1:4] = round(stats[1:4],2)
 
 write.csv(stats, "/Users/max/Documents/Local/MS/results/Simulation_Results.csv")
 
-
-
-
 # 1.1 check model coefficients ----
 #
 # disability progression stable
 curious$names = c(rownames(curious))
 signi = c("edss","Current_DMT","age","Vit_A_0","Vit_D_0")
 curious %>% filter(str_detect(as.character(names), str_c(as.character(signi), collapse="|")))
-summary(model)
 # processing speed stable
 cbind( 	exp(coef(model)), 	exp(summary(model)$coefficients[,1] - 1.96*summary(model)$coefficients[,2]), 	exp(summary(model3)$coefficients[,1] + 1.96*summary(model)$coefficients[,2]) )
-
+summary(model)
 
 
 
 # Original data -------
+data = read.csv("/Users/max/Documents/Local/MS/results/interrim_data.csv")
 data$FLG = factor(data$FLG)
 data$FLG = relevel(data$FLG, ref = 2)
 test = glm(FLG~.,data=data%>%dplyr::select(FLG,edss, Vit_D_0, Vit_A_0,Current_DMT),family = "binomial")
 cbind( 	exp(coef(test)), 	exp(summary(test)$coefficients[,1] - 1.96*summary(test)$coefficients[,2]), 	exp(summary(test)$coefficients[,1] + 1.96*summary(test)$coefficients[,2]) )
 
 
+data[!duplicated(data$eid),] %>% select(FLG,CLG) %>% table
+data[!duplicated(data$eid),] %>% select(FLG) %>% table()
+data[!duplicated(data$eid),] %>% select(CLG) %>% table()
