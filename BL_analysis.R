@@ -314,8 +314,8 @@ median(unlist(na.omit(data%>%filter(CLG == 1))["edss"]))
 mad(unlist(na.omit(data%>%filter(CLG == 1))["edss"]))
 median(unlist(na.omit(data%>%filter(CLG == 0))["edss"]))
 mad(unlist(na.omit(data%>%filter(CLG == 0))["edss"]))
-# wilcox.test(edss~CLG,data)
-# wilcox_effsize(data,edss~CLG,ci=T)
+wilcox.test(edss~CLG,data)
+wilcox_effsize(data,edss~CLG,ci=T)
 #
 #
 #
