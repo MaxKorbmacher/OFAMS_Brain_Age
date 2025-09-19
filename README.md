@@ -110,8 +110,8 @@ Individual level variability (each feature can range from the minimum to the max
 ![single_sub](https://github.com/user-attachments/assets/7a353fd5-b83f-4eb1-863d-04b163e23d00)
 
 
-## Results
-The results will soon be presented in a pre-print and following scientific publication.
-Multiverse summary statistics can be found here: https://doi.org/10.17605/OSF.IO/AE5RX
+## For usage please cite:
+Korbmacher, M., Lie, I. A., Wesnes, K., Westman, E., Espeseth, T., Specht, K., ... & Høgestøl, E. A. (2025). Multimodal predictors of disability progression and processing speed decline in relapsing-remitting multiple sclerosis. [medRxiv](https://doi.org/10.1101/2025.02.09.25321961 )
 
+For more information or questions contact Max Korbmacher: max.korbmacher[at]gmail.com
 
